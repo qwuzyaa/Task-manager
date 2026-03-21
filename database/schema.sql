@@ -1,15 +1,15 @@
 CREATE TABLE users (
 	id INTEGER PRIMARY KEY, 
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
     created_time DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE tasks (
 	id INTEGER PRIMARY KEY, 
     user_id INTEGER,
-    name VARCHAR(255) NOT NULL, 
-    description VARCHAR(255), 
+    name TEXT NOT NULL, 
+    description TEXT, 
     created_time DATETIME DEFAULT CURRENT_TIMESTAMP,
     time_limit DATETIME,
     status BOOLEAN DEFAULT 0,
