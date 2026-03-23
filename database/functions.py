@@ -80,5 +80,12 @@ def create_task(user_id, name, description, status, limit_time):
     print (f"Задание '{name}' успешно добавлено!")
     con.commit()
 
+#Получение списка всех задач для пользователя
+def get_tasks(user_id):
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ?''', (user_id,))
+    result = cur.fetchall()
+    for task in result:
+        print(task)
+
 
 
