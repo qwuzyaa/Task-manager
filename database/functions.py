@@ -53,7 +53,7 @@ def update_user(id, name = None, username = None, password = None):
     if password:
         pas = cur.execute('''SELECT password FROM users WHERE id = ?''', (id,)).fetchone()[0]
         old_pas = int(input('Введите старый пароль: '))
-        if old_pas == password:
+        if old_pas == pas:
             update.append('password = ?')
             params.append (password)
         else:
