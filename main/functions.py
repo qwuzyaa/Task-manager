@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-con = sqlite3.connect('task_m.db')
+con = sqlite3.connect('database/task_m.db')
 cur = con.cursor()
 
 #Для таблицы USERS
