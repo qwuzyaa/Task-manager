@@ -46,7 +46,7 @@ def get_all_users():
         for user in result:
             print(user)
 
-#Обновление информации пользователя
+#Обновление информации пользователя полностью
 def update_user(id, name = None, username = None, password = None):
     con = sqlite3.connect('database/task_m.db')
     cur = con.cursor()
@@ -72,6 +72,38 @@ def update_user(id, name = None, username = None, password = None):
         con.commit()
         con.close()
         print("Пользователь обновлен!")
+
+#Обновление имени
+def update_name(id, name):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    cur.execute('''UPDATE users SET name = ? WHERE id = ?''', (name,id))
+    con.commit()
+    con.close()
+    print("Имя пользователя обновлено!")
+
+#Обновление username
+def update_username(id, username):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    cur.execute('''UPDATE users SET username = ? WHERE id = ?''', (username, id))
+    con.commit()
+    con.close()
+    print("Username пользователя обновлен!")
+
+#Обновление username
+def update_password(id, password):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    pas = cur.execute('''SELECT password FROM users WHERE id = ?''', (id,)).fetchone()[0]
+    old_pas = int(input('Введите старый пароль: '))
+    if old_pas == pas:
+        cur.execute('''UPDATE users SET password = ? WHERE id = ?''', (password, id))
+        con.commit()
+        con.close()
+        print("Пароль пользователя обновлен!")
+    else:
+        print('Старый пароль неправильный')
 
 #Удаление пользователя
 def delete_user(username):
@@ -137,6 +169,33 @@ def update_task(id, name, description, status, limit_time):
         con.commit()
         con.close()
         print("Задача обновлена!")
+
+#Обновление названия задачи
+def update_name_task(id, name):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    cur.execute('''UPDATE tasks SET name = ? WHERE id = ?''', (name, id))
+    con.commit()
+    con.close()
+    print("Название обновлено")
+
+#Обновление описания задачи
+def update_name_task(id, description):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    cur.execute('''UPDATE tasks SET description = ? WHERE id = ?''', (description, id))
+    con.commit()
+    con.close()
+    print("Описание обновлено")
+
+#Обновление дедлайна задачи
+def update_status(id, limit_time):
+    con = sqlite3.connect('database/task_m.db')
+    cur = con.cursor()
+    cur.execute('''UPDATE tasks SET limit_time = ? WHERE id = ?''', (limit_time, id))
+    con.commit()
+    con.close()
+    print("Дедлайн обновлен")
 
 #Обновление статуса задачи
 def update_status(id, status):
