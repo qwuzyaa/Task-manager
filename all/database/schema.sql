@@ -2,7 +2,7 @@ CREATE TABLE users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     username TEXT UNIQUE NOT NULL,
-    password TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
     created_time TEXT NOT NULL
 );
 

@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from functions import *
 
 app = FastAPI()
@@ -35,7 +36,6 @@ def create_u(name: str, username: str, password: str):
 def delete_u(username: str):
     """Удалить пользователя"""
     delete_user(username)
-
 
 @app.put("/users/{id}")
 def update_u(id: int, name: str, username: str, password: str):
