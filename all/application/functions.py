@@ -19,7 +19,7 @@ def create_user(name, username, password):
 def get_user_username(username):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM users WHERE username = ?''', (username,))
+    cur.execute('''SELECT id, name, username, password FROM users WHERE username = ?''', (username,))
     result = cur.fetchone()
     con.close()
     return result
@@ -237,10 +237,11 @@ def update_status(id, status):
     print("Статус обновлен")
 
 #Удаление задачи
-def delete_task(id):
+def delete_task(id, user_id):
     con = sqlite3.connect('database/task_m.db')
     cur = con.cursor()
-    cur.execute('''DELETE FROM tasks WHERE id = ?''', (id,))
+    cur.execute('''DELETE FROM tasks WHERE id = ? AND user_id = ?''', (id,user_id))
     con.commit()
     con.close()
-    print("Задача удалена!")
+    #print("Задача удалена!")
+
