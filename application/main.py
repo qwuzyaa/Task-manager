@@ -22,9 +22,13 @@ def register_user(user: CreateUser):
     """Регистрация пользователя"""
     trying = get_user_username(user.username)
     if trying:
-        return
+        raise HTTPException(status_code=400, detail="User already exists")
+
     user_id = create_user(user.name, user.username, user.password)
     u = get_user_id(user_id)
+    if u is None:
+        raise HTTPException(status_code=500, detail="Failed to create user")
+
     return OutputUser(
         id=u[0],
         name=u[1],
@@ -33,17 +37,17 @@ def register_user(user: CreateUser):
         created_time=u[4]
     )
 
-
 @app.post("/login", status_code=status.HTTP_200_OK)
-def Login_user(user: LoginUser):
+def login_user(user: LoginUser):
     """Вход пользователя"""
     u = get_user_username(user.username)
-    if int(u[3]) == user.password:
-        return {
-            "message": "Login successful",
-            "user_id": u[0],
-            "username": u[2]
-        }
+    if u is None or int(u[3]) != user.password:
+        raise HTTPException(status_code=401, detail="Invalid data")
+    return {
+        "message": "Login successful",
+        "user_id": u[0],
+        "username": u[2]
+    }
 
 @app.get("/users/{identificate}", response_model=OutputUser, status_code=status.HTTP_200_OK)
 def get_by_id(identificate):
@@ -108,7 +112,7 @@ def update_u(user: UpdateUser):
 
 @app.post("/tasks", response_model=OutputTask, status_code=status.HTTP_201_CREATED)
 def create_t(task: CreateTask):
-    '''Создание задачи'''
+    """Создание задачи"""
     task = create_task(task.user_id, task.name, task.description, task.status, task.limit_time)
     return OutputTask(id=task[0],
                    user_id=task[1],
@@ -120,7 +124,7 @@ def create_t(task: CreateTask):
 
 @app.get("/tasks/{user_id}", response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_all_tasks(user_id: int):
-    '''Получить все задачи пользователя'''
+    """Получить все задачи пользователя"""
     tasks = get_tasks(user_id)
     if not tasks:
         return []
@@ -138,7 +142,7 @@ def get_all_tasks(user_id: int):
 
 @app.get("/tasks/{user_id}/{name}", response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_tasks_by_name(user_id: int, name: str):
-    '''Получить задачу пользователя по названию'''
+    """Получить задачу пользователя по названию"""
     tasks = get_task_name(name, user_id)
     result = [
         OutputTask(id=task[0],
@@ -166,6 +170,6 @@ def update_t(task: UpdateTask):
 
 @app.delete("/tasks/{user_id}/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_tasks(id: int,user_id: int):
-    '''Удаление задачи пользователя'''
+    """Удаление задачи пользователя"""
     delete_task(id,user_id)
     #return {'message': 'Задача удалена'}
