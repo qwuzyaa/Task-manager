@@ -88,17 +88,19 @@ def update_user(id, name = None, username = None, password = None):
             #params.append (password)
         #else:
             #return 'Старый пароль неправильный'
-
         update.append('password = ?')
         params.append(password)
 
     if update:
         params.append(id)
         cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params )
-        #user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
+        user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
         con.commit()
-        con.close()
-        #return "Данные обновлены"
+    else:
+        user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
+        con.commit()
+    con.close()
+    return user
     #else:
         #user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
         #return "Данные не обновлялись"
@@ -165,7 +167,7 @@ def delete_user_id(id):
 #Для таблицы TASKS
 #Добавление записи
 def create_task(user_id, name, description, status, limit_time):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time) 
     VALUES (?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now()))
@@ -176,7 +178,7 @@ def create_task(user_id, name, description, status, limit_time):
 
 #Получение списка всех задач для пользователя
 def get_tasks(user_id):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''SELECT * FROM tasks WHERE user_id = ?''', (user_id,))
     result = cur.fetchall()
@@ -185,7 +187,7 @@ def get_tasks(user_id):
 
 #Получить задачи пользователя по названию
 def get_task_name(name, user_id):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND name = ?''', (user_id, name))
     result = cur.fetchall()
@@ -194,8 +196,8 @@ def get_task_name(name, user_id):
     return result
 
 #Обновление задачи полностью
-def update_task(id, name, description, status, limit_time):
-    con = sqlite3.connect('database/task_m.db')
+def update_task(id, user_id, name, description, status, limit_time):
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     update = []
     params = []
@@ -213,14 +215,18 @@ def update_task(id, name, description, status, limit_time):
         params.append(limit_time)
     if update:
         params.append(id)
-        cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params)
+        cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
+        task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
         con.commit()
-        con.close()
-        print("Задача обновлена!")
+    else:
+        task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
+        con.commit()
+    con.close()
+    return task
 
 #Обновление названия задачи
 def update_name_task(id, name):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''UPDATE tasks SET name = ? WHERE id = ?''', (name, id))
     con.commit()
@@ -229,7 +235,7 @@ def update_name_task(id, name):
 
 #Обновление описания задачи
 def update_name_task(id, description):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''UPDATE tasks SET description = ? WHERE id = ?''', (description, id))
     con.commit()
@@ -238,7 +244,7 @@ def update_name_task(id, description):
 
 #Обновление дедлайна задачи
 def update_status(id, limit_time):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''UPDATE tasks SET limit_time = ? WHERE id = ?''', (limit_time, id))
     con.commit()
@@ -247,7 +253,7 @@ def update_status(id, limit_time):
 
 #Обновление статуса задачи
 def update_status(id, status):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''UPDATE tasks SET status = ? WHERE id = ?''', (status, id))
     con.commit()
@@ -256,7 +262,7 @@ def update_status(id, status):
 
 #Удаление задачи
 def delete_task(id, user_id):
-    con = sqlite3.connect('database/task_m.db')
+    con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''DELETE FROM tasks WHERE id = ? AND user_id = ?''', (id,user_id))
     con.commit()
