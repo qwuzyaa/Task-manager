@@ -6,4 +6,4 @@ from application.schemes import *
 #print(create_task(1, 'Work', "", 1, '22-04-2026'))
 #print(get_task_name('Work', 1))
 #print(update_user(2, 'Anastasia', 'qwuzya', 21412))
-print(update_task(4, 1, 'Homework', '', 0, '21-05-2026'))
+#print(update_task(4, 1, None , None, 1, '21-05-2026'))

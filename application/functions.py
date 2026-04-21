@@ -10,7 +10,7 @@ def create_user(name, username, password):
     cur = con.cursor()
     cur.execute('''INSERT INTO users (name, username, password, created_time) 
     VALUES (?, ?, ?, ?)''', (name, username, password, datetime.now()))
-    user = cur.execute('''SELECT * FROM users WHERE username = ?''', (username,)).fetchone()
+    user = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
     con.commit()
     con.close()
     return user
@@ -74,24 +74,17 @@ def update_user(id, name = None, username = None, password = None):
     cur = con.cursor()
     update = []
     params = []
-    if name:
+    if name is not None:
         update.append ('name = ?')
         params.append (name)
-    if username:
+    if username is not None:
         update.append ('username = ?')
         params.append (username)
-    if password:
-        #pas = cur.execute('''SELECT password FROM users WHERE id = ?''', (id,)).fetchone()[0]
-        #old_pas = int(input('Введите старый пароль: '))
-        #if old_pas == pas:
-            #update.append('password = ?')
-            #params.append (password)
-        #else:
-            #return 'Старый пароль неправильный'
+    if password is not None:
         update.append('password = ?')
         params.append(password)
 
-    if update:
+    if len(update)>0:
         params.append(id)
         cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params )
         user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
@@ -201,19 +194,19 @@ def update_task(id, user_id, name, description, status, limit_time):
     cur = con.cursor()
     update = []
     params = []
-    if name:
+    if name is not None:
         update.append('name = ?')
         params.append(name)
-    if description:
+    if description is not None:
         update.append('description = ?')
         params.append(description)
-    if status:
+    if status is not None:
         update.append('status = ?')
         params.append(status)
-    if limit_time:
+    if limit_time is not None:
         update.append('limit_time = ?')
         params.append(limit_time)
-    if update:
+    if len(update)>0:
         params.append(id)
         cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
         task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()

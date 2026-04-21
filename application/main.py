@@ -1,17 +1,27 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from functions import *
 from schemes import *
 
 app = FastAPI()
 
+'''
+def get_current_user_id(x_user_id: int = Header(..., alias="X-User-Id")) -> int:
+    """Получает текущего пользователя из заголовка"""
+    user = get_user_id(x_user_id)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid user")
+    return x_user_id
+'''
+
 @app.get("/")
 def root():
     return {"message": "Hello World"}
 
-@app.post("/users", response_model=OutputUser)
-def create_u(user: CreateUser):
-    """Создать пользователя"""
-    u = create_user(user.name, user.username, user.password)
+@app.post("/register", response_model=OutputUser)
+def register_user(user: CreateUser):
+    """Регистрация пользователя"""
+    user_id = create_user(user.name, user.username, user.password)
+    u = get_user_id(user_id)
     return OutputUser(
         id=u[0],
         name=u[1],
@@ -20,8 +30,20 @@ def create_u(user: CreateUser):
         created_time=u[4]
     )
 
+
+@app.post("/login")
+def Login_user(user: LoginUser):
+    """Вход пользователя"""
+    u = get_user_username(user.username)
+    if int(u[3]) == user.password:
+        return {
+            "message": "Login successful",
+            "user_id": u[0],
+            "username": u[2]
+        }
+
 @app.get("/users/{identificate}", response_model=OutputUser)
-def get_username(identificate):
+def get_by_id(identificate):
     """Информация о пользователе по username или по id"""
     if identificate.isdigit():
         user = get_user_id(identificate)

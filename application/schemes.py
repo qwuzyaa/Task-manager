@@ -7,11 +7,15 @@ class CreateUser(BaseModel):
     username: str
     password: int
 
+class LoginUser(BaseModel):
+    username: str
+    password: int
+
 class UpdateUser(BaseModel):
     id: int
-    name: Optional[str]
-    username: Optional[str]
-    password: Optional[int]
+    name: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[int] = None
 
 class OutputUser(BaseModel):
     id: int
@@ -30,10 +34,10 @@ class CreateTask(BaseModel):
 class UpdateTask(BaseModel):
     id: int
     user_id: int
-    name: str
-    description: str
-    status: int
-    limit_time: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[int] = None
+    limit_time: Optional[str] = None
 
 class OutputTask(BaseModel):
     id: int
