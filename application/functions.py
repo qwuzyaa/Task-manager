@@ -26,13 +26,15 @@ def get_user_username(username):
 
 #Информация о пользователях по имени
 def get_user_name(name):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute('''SELECT id, name, username, created_time FROM users WHERE name = ?''', (name,))
-    result = cur.fetchall()
-    con.close()
-    return result
-
+    try:
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute('''SELECT id, name, username, created_time FROM users WHERE name = ?''', (name,))
+        result = cur.fetchall()
+        con.close()
+        return result
+    except sqlite3.OperationalError as e:
+        return e
 #Информация о пользователях по id
 def get_user_id(id):
     con = sqlite3.connect(DB_PATH)
@@ -43,13 +45,17 @@ def get_user_id(id):
     return result
 
 def get_all_users_v2():
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute('''SELECT id, name, username, created_time FROM users''')
-    result = cur.fetchall()
-    con.close()
-    return result
-
+    try:
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute('''SELECT id, name, username, created_time FROM users''')
+        result = cur.fetchall()
+        con.close()
+        return result
+    except sqlite3.OperationalError as e:
+        raise e
+    except Exception as e:
+        raise e
 #Обновление информации пользователя полностью
 def update_user(id, name = None, username = None, password = None):
     con = sqlite3.connect(DB_PATH)
