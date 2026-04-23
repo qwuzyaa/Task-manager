@@ -7,14 +7,7 @@ router = APIRouter()
 
 admin_key = 'Task-manager-admin'
 
-def get_current_user_id(x_user_id: int = Header(..., alias="X-User-Id")) -> int:
-    """Получаем текущего пользователя из заголовка"""
-    user = get_user_id(x_user_id)
-    #f not user:
-        #raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
-    return x_user_id
-
-@router.get("/api")
+@router.get("/")
 def root():
     return {"message": "Hello World"}
 
@@ -47,12 +40,13 @@ def register_user(user: CreateUser):
 def login_user(user: LoginUser):
     """Вход пользователя"""
     try:
-        pas = get_user_pass(user.username)
         u = get_user_username(user.username)
-        if pas is None and u is None:
+        if u is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No such user")
-        if str(pas) != user.password:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid data")
+        else:
+            pas = get_user_pass(user.username)
+            if str(pas) != user.password:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid data")
         return {
            "message": "Login successful",
            "user_id": u[0],
@@ -118,26 +112,26 @@ def delete_u(id: int):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.put("/api/users/{id}", tags = ['User'], response_model=OutputUser)
-def update_u(user: UpdateUser, id: int ):
+def update_u(id: int, user: UpdateUser):
     """Обновить данные пользователя"""
     try:
-        trying_1 = get_user_username(user.username)
+        trying_1 = get_user_id(id)
         if trying_1 is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         if user.name is None and user.username is None and user.password is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nothing to update")
         if user.username is not None:
-            if trying_1 is not None and int(trying_1[0]) != id:
+            if trying_1 is not None and trying_1[0] != id:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username is already in use")
-            else:
-                u = update_user(id, user.name, user.username, user.password)
-                if u is None:
-                   raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-                return OutputUser(
-                    id=u[0],
-                    name=u[1],
-                    username=u[2],
-                    created_time=u[3]
+        else:
+            u = update_user(id, user.name, user.username, user.password)
+            if u is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            return OutputUser(
+                id=u[0],
+                name=u[1],
+                username=u[2],
+                created_time=u[3]
                 )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

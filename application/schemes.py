@@ -52,7 +52,7 @@ class LoginUser(BaseModel):
 class UpdateUser(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=20)
     username: Optional[str] = Field(None, min_length=2, max_length=50)
-    password: Optional[int] = Field(None, min_length=8)
+    password: Optional[str] = Field(None, min_length=8)
 
     @field_validator('name')
     @classmethod
@@ -77,7 +77,7 @@ class UpdateUser(BaseModel):
     def validate_password(cls, v: str) -> str:
         if len(v) < 8:
             raise ValueError('Password must be at least 8 characters')
-        if not re.search(r'[A-Z]', v) or not re.search(r'[a-z]', v):
+        if not re.search(r'[A-Za-z]', v):
             raise ValueError('Password must contain at least one letter')
         if " " in v:
             raise ValueError('Password must not contain spaces')

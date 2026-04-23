@@ -1,3 +1,3 @@
 from application.functions import *
 
-print(get_user_pass('kitkarty'))
+print(update_user(1, 'ADMIN', None, None))
