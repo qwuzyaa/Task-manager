@@ -6,107 +6,85 @@ DB_PATH = r"C:\Users\User\Task-manager\database\task_m.db"
 #Для таблицы USERS
 #Добавление пользователя
 def create_user(name, username, password):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''INSERT INTO users (name, username, password, created_time) 
-        VALUES (?, ?, ?, ?)''', (name, username, password, datetime.now()))
-        user = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
-        con.commit()
-        con.close()
-        return user
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''INSERT INTO users (name, username, password, created_time) VALUES (?, ?, ?, ?)''', (name, username, password, datetime.now()))
+    user = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
+    con.commit()
+    con.close()
+    return user
 
 #Информация об одном пользователе по username
 def get_user_username(username):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT id, name, username, created_time FROM users WHERE username = ?''', (username,))
-        result = cur.fetchone()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE username = ?''', (username,))
+    result = cur.fetchone()
+    con.close()
+    return result
+
+#Получение пароля
+def get_user_pass(username):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT password FROM users WHERE username = ?''', (username,))
+    result = cur.fetchone()
+    con.close()
+    return result[0]
 
 #Информация о пользователях по имени
 def get_user_name(name):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT id, name, username, created_time FROM users WHERE name = ?''', (name,))
-        result = cur.fetchall()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE name = ?''', (name,))
+    result = cur.fetchall()
+    con.close()
+    return result
 
 #Информация о пользователях по id
 def get_user_id(id):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,))
-        result = cur.fetchone()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,))
+    result = cur.fetchone()
+    con.close()
+    return result
 
 #Информация о всех пользователях
 def get_all_users_v2():
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT id, name, username, created_time FROM users''')
-        result = cur.fetchall()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT id, name, username, created_time FROM users''')
+    result = cur.fetchall()
+    con.close()
+    return result
 
 #Обновление информации пользователя полностью
 def update_user(id, name = None, username = None, password = None):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        update = []
-        params = []
-        if name is not None:
-            update.append ('name = ?')
-            params.append (name)
-        if username is not None:
-            update.append ('username = ?')
-            params.append (username)
-        if password is not None:
-            update.append('password = ?')
-            params.append(password)
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    update = []
+    params = []
+    if name is not None:
+        update.append('name = ?')
+        params.append(name)
+    if username is not None:
+        update.append('username = ?')
+        params.append(username)
+    if password is not None:
+        update.append('password = ?')
+        params.append(password)
 
-        if len(update)>0:
-            params.append(id)
-            cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params )
-            user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
-            con.commit()
-        else:
-            user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
-            con.commit()
-        con.close()
-        return user
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    if len(update) > 0:
+        params.append(id)
+        cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params)
+        user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
+        con.commit()
+    else:
+        user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
+        con.commit()
+    con.close()
+    return user
 
 #Обновление имени
 def update_name(id, name):
@@ -151,17 +129,12 @@ def update_password_v2(id, password):
 
 #Удаление пользователя
 def delete_user(username):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        user_id = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
-        cur.execute('''DELETE FROM users WHERE id = ?''', (user_id,))
-        con.commit()
-        con.close()
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    user_id = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
+    cur.execute('''DELETE FROM users WHERE id = ?''', (user_id,))
+    con.commit()
+    con.close()
 
 def delete_user_id(id):
     con = sqlite3.connect(DB_PATH)
@@ -173,81 +146,69 @@ def delete_user_id(id):
 #Для таблицы TASKS
 #Добавление записи
 def create_task(user_id, name, description, status, limit_time):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time) 
-        VALUES (?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now()))
-        task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, cur.lastrowid)).fetchone()
-        con.commit()
-        con.close()
-        return task
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time) VALUES (?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now()))
+    task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, cur.lastrowid)).fetchone()
+    con.commit()
+    con.close()
+    return task
 
 #Получение списка всех задач для пользователя
 def get_tasks(user_id):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT * FROM tasks WHERE user_id = ?''', (user_id,))
-        result = cur.fetchall()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ?''', (user_id,))
+    result = cur.fetchall()
+    con.close()
+    return result
 
 #Получить задачи пользователя по названию
 def get_task_name(name, user_id):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND name = ?''', (user_id, name))
-        result = cur.fetchall()
-        con.close()
-        return result
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND name = ?''', (user_id, name))
+    result = cur.fetchall()
+    con.close()
+    return result
+
+#Получить задачу пользователя по id
+def get_task_id(id, user_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id))
+    result = cur.fetchone()
+    con.close()
+    return result
 
 #Обновление задачи полностью
 def update_task(id, user_id, name, description, status, limit_time):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        update = []
-        params = []
-        if name is not None:
-            update.append('name = ?')
-            params.append(name)
-        if description is not None:
-            update.append('description = ?')
-            params.append(description)
-        if status is not None:
-            update.append('status = ?')
-            params.append(status)
-        if limit_time is not None:
-            update.append('limit_time = ?')
-            params.append(limit_time)
-        if len(update)>0:
-            params.append(id)
-            cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
-            task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
-            con.commit()
-        else:
-            task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
-            con.commit()
-        con.close()
-        return task
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    update = []
+    params = []
+    if name is not None:
+        update.append('name = ?')
+        params.append(name)
+    if description is not None:
+        update.append('description = ?')
+        params.append(description)
+    if status is not None:
+        update.append('status = ?')
+        params.append(status)
+    if limit_time is not None:
+        update.append('limit_time = ?')
+        params.append(limit_time)
+    if len(update) > 0:
+        params.append(id)
+        cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
+        task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
+        con.commit()
+    else:
+        task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
+        con.commit()
+    con.close()
+    return task
 
 #Обновление названия задачи
 def update_name_task(id, name):
@@ -287,14 +248,9 @@ def update_status(id, status):
 
 #Удаление задачи
 def delete_task(id, user_id):
-    try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
-        cur.execute('''DELETE FROM tasks WHERE id = ? AND user_id = ?''', (id,user_id))
-        con.commit()
-        con.close()
-    except sqlite3.OperationalError as e:
-        raise e
-    except Exception as e:
-        raise e
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''DELETE FROM tasks WHERE id = ? AND user_id = ?''', (id, user_id))
+    con.commit()
+    con.close()
 

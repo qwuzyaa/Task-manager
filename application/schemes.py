@@ -26,6 +26,8 @@ class CreateUser(BaseModel):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
+        if not re.search(r'[a-zA-Z]', v):
+            raise ValueError('Username must contain letters')
         return v
 
     @field_validator('password')
@@ -45,10 +47,9 @@ class CreateUser(BaseModel):
 
 class LoginUser(BaseModel):
     username: str = Field(...)
-    password: int = Field(...)
+    password: str = Field(...)
 
 class UpdateUser(BaseModel):
-    id: int
     name: Optional[str] = Field(None, min_length=1, max_length=20)
     username: Optional[str] = Field(None, min_length=2, max_length=50)
     password: Optional[int] = Field(None, min_length=8)
@@ -94,10 +95,9 @@ class OutputUser(BaseModel):
     created_time: str
 
 class CreateTask(BaseModel):
-    user_id: int = Field(...)
     name: str = Field(..., min_length=1, max_length=100)
     description: str = Field(None, max_length=300)
-    status: Literal[0,1] = Field(default=0)
+    status: int = Field(default=0)
     limit_time: str = Field(None)
 
     @field_validator('limit_time')
@@ -106,14 +106,15 @@ class CreateTask(BaseModel):
         if v is None:
             return v
         try:
-            datetime.datetime.strptime(v, '%Y-%m-%d')
+            input = datetime.datetime.strptime(v, '%Y-%m-%d').date()
+            current = datetime.date.today()
+            if current > input:
+                raise ValueError
         except ValueError:
-            raise ValueError(f'Wrong format of {v}')
+            raise ValueError('Wrong format of data')
         return v
 
 class UpdateTask(BaseModel):
-    id: int
-    user_id: int
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str] = Field(None, max_length=300)
     status: Optional[Literal[0,1]] = Field(None)
@@ -127,14 +128,14 @@ class UpdateTask(BaseModel):
         try:
             datetime.datetime.strptime(v, '%Y-%m-%d')
         except ValueError:
-            raise ValueError(f'Wrong format of {v}')
+            raise ValueError(f'Wrong format of data')
         return v
 
 class OutputTask(BaseModel):
-    id: int
     user_id: int
+    id: int
     name: str
-    description: str
+    description: Optional[str]
     status: int
-    limit_time: str
+    limit_time: Optional[str]
     created_time: str
