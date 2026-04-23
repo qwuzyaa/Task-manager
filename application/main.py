@@ -1,9 +1,11 @@
 from fastapi import FastAPI, status, HTTPException, Header, Depends
 from functions import *
 from schemes import *
+import pages
 import sqlite3
-import re
+
 app = FastAPI()
+app.include_router(pages.router)
 
 admin_key = 'Task-manager-admin'
 
@@ -14,11 +16,11 @@ def get_current_user_id(x_user_id: int = Header(..., alias="X-User-Id")) -> int:
         #raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user")
     return x_user_id
 
-@app.get("/")
+@app.get("/api")
 def root():
     return {"message": "Hello World"}
 
-@app.post("/register", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_201_CREATED)
+@app.post("/api/register", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_201_CREATED)
 def register_user(user: CreateUser):
     """Регистрация пользователя"""
     try:
@@ -43,7 +45,7 @@ def register_user(user: CreateUser):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.post("/login", tags = ['User'], status_code=status.HTTP_200_OK)
+@app.post("/api/login", tags = ['User'], status_code=status.HTTP_200_OK)
 def login_user(user: LoginUser):
     """Вход пользователя"""
     try:
@@ -61,7 +63,7 @@ def login_user(user: LoginUser):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.get("/users/{id}", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_200_OK)
+@app.get("/api/users/{id}", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_200_OK)
 def get_by_id(id: int = Depends(get_current_user_id)):
     """Информация о пользователе по id"""
     try:
@@ -95,7 +97,7 @@ def get_name(name: str):
     return result
 '''
 
-@app.get("/admin/users", tags = ['User'], status_code=status.HTTP_200_OK)
+@app.get("/api/admin/users", tags = ['User'], status_code=status.HTTP_200_OK)
 def get_all(key: str):
     """Информация о всех пользователях"""
     try:
@@ -117,7 +119,7 @@ def get_all(key: str):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.delete("/users/{id}",tags = ['User'], status_code=status.HTTP_200_OK)
+@app.delete("/api/users/{id}",tags = ['User'], status_code=status.HTTP_200_OK)
 def delete_u(id: int = Depends(get_current_user_id)):
     """Удалить пользователя"""
     try:
@@ -130,11 +132,11 @@ def delete_u(id: int = Depends(get_current_user_id)):
             if u is not None:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Cannot delete user")
             else:
-                return {"message": f"User {u[2]} deleted"}
+                return {"message": f"User deleted"}
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.put("/users/{id}", tags = ['User'], response_model=OutputUser)
+@app.put("/api/users/{id}", tags = ['User'], response_model=OutputUser)
 def update_u(user: UpdateUser, id: int = Depends(get_current_user_id)):
     """Обновить данные пользователя"""
     try:
@@ -159,7 +161,7 @@ def update_u(user: UpdateUser, id: int = Depends(get_current_user_id)):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.post("/tasks", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_201_CREATED)
+@app.post("/api/tasks", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_201_CREATED)
 def create_t(task: CreateTask, user_id: int = Depends(get_current_user_id)):
     """Создание задачи"""
     try:
@@ -181,7 +183,7 @@ def create_t(task: CreateTask, user_id: int = Depends(get_current_user_id)):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.get("/tasks/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+@app.get("/api/tasks/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_all_tasks(user_id: int = Depends(get_current_user_id)):
     """Получить все задачи пользователя"""
     try:
@@ -206,7 +208,7 @@ def get_all_tasks(user_id: int = Depends(get_current_user_id)):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.get("/tasks/search/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+@app.get("/api/tasks/search/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_tasks_by_name(name: str, user_id: int = Depends(get_current_user_id)):
     """Получить задачи пользователя по названию"""
     try:
@@ -232,7 +234,7 @@ def get_tasks_by_name(name: str, user_id: int = Depends(get_current_user_id)):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.get("/tasks/task/{id}", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_200_OK)
+@app.get("/api/tasks/task/{id}", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_200_OK)
 def get_task_by_id(id: int, user_id: int = Depends(get_current_user_id)):
     """Получить задачу пользователя по id"""
     try:
@@ -254,7 +256,7 @@ def get_task_by_id(id: int, user_id: int = Depends(get_current_user_id)):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.put("/tasks/{user_id}/{id}", tags = ['Task'], response_model=OutputTask)
+@app.put("/api/tasks/{user_id}/{id}", tags = ['Task'], response_model=OutputTask)
 def update_t(id: int, task: UpdateTask, user_id: int = Depends(get_current_user_id)):
     """Обновить данные о задаче"""
     try:
@@ -278,7 +280,7 @@ def update_t(id: int, task: UpdateTask, user_id: int = Depends(get_current_user_
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@app.delete("/tasks/{user_id}/{id}", tags = ['Task'], status_code=status.HTTP_200_OK)
+@app.delete("/api/tasks/{user_id}/{id}", tags = ['Task'], status_code=status.HTTP_200_OK)
 def delete_tasks(id: int, user_id: int = Depends(get_current_user_id)):
     """Удаление задачи пользователя"""
     try:
