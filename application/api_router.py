@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException, Header, Depends, APIRouter
+from fastapi import status, HTTPException, Header, Depends, APIRouter
 from application.functions import *
 from application.schemes import *
 import sqlite3
@@ -62,7 +62,7 @@ def login_user(user: LoginUser):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/api/users/{id}", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_200_OK)
-def get_by_id(id: int = Depends(get_current_user_id)):
+def get_by_id(id: int):
     """Информация о пользователе по id"""
     try:
         user = get_user_id(id)
@@ -77,23 +77,6 @@ def get_by_id(id: int = Depends(get_current_user_id)):
         )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-'''
-@app.get("/users/{name}/", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
-def get_name(name: str):
-    """Информация о пользователях по name"""
-    users = get_user_name(name)
-    if users is None:
-        raise HTTPException(status_code=404, detail="Users not found")
-    result = [
-        OutputUser(id = user[0],
-                   name=user[1],
-                   username=user[2],
-                   created_time=user[3])
-        for user in users
-    ]
-    return result
-'''
 
 @router.get("/api/admin/users", tags = ['User'], status_code=status.HTTP_200_OK)
 def get_all(key: str):
@@ -118,7 +101,7 @@ def get_all(key: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.delete("/api/users/{id}",tags = ['User'], status_code=status.HTTP_200_OK)
-def delete_u(id: int = Depends(get_current_user_id)):
+def delete_u(id: int):
     """Удалить пользователя"""
     try:
         users = get_user_id(id)
@@ -135,7 +118,7 @@ def delete_u(id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.put("/api/users/{id}", tags = ['User'], response_model=OutputUser)
-def update_u(user: UpdateUser, id: int = Depends(get_current_user_id)):
+def update_u(user: UpdateUser, id: int ):
     """Обновить данные пользователя"""
     try:
         trying_1 = get_user_username(user.username)
@@ -160,7 +143,7 @@ def update_u(user: UpdateUser, id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.post("/api/tasks", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_201_CREATED)
-def create_t(task: CreateTask, user_id: int = Depends(get_current_user_id)):
+def create_t(task: CreateTask, user_id: int):
     """Создание задачи"""
     try:
         user = get_user_id(user_id)
@@ -182,7 +165,7 @@ def create_t(task: CreateTask, user_id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/api/tasks/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
-def get_all_tasks(user_id: int = Depends(get_current_user_id)):
+def get_all_tasks(user_id: int):
     """Получить все задачи пользователя"""
     try:
         user = get_user_id(user_id)
@@ -207,7 +190,7 @@ def get_all_tasks(user_id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/api/tasks/search/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
-def get_tasks_by_name(name: str, user_id: int = Depends(get_current_user_id)):
+def get_tasks_by_name(name: str, user_id: int):
     """Получить задачи пользователя по названию"""
     try:
         user = get_user_id(user_id)
@@ -233,7 +216,7 @@ def get_tasks_by_name(name: str, user_id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/api/tasks/task/{id}", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_200_OK)
-def get_task_by_id(id: int, user_id: int = Depends(get_current_user_id)):
+def get_task_by_id(id: int, user_id: int):
     """Получить задачу пользователя по id"""
     try:
         user = get_user_id(user_id)
@@ -255,7 +238,7 @@ def get_task_by_id(id: int, user_id: int = Depends(get_current_user_id)):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.put("/api/tasks/{user_id}/{id}", tags = ['Task'], response_model=OutputTask)
-def update_t(id: int, task: UpdateTask, user_id: int = Depends(get_current_user_id)):
+def update_t(id: int, task: UpdateTask, user_id: int):
     """Обновить данные о задаче"""
     try:
         trying = get_task_by_id(id, user_id)
@@ -279,7 +262,7 @@ def update_t(id: int, task: UpdateTask, user_id: int = Depends(get_current_user_
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.delete("/api/tasks/{user_id}/{id}", tags = ['Task'], status_code=status.HTTP_200_OK)
-def delete_tasks(id: int, user_id: int = Depends(get_current_user_id)):
+def delete_tasks(id: int, user_id: int):
     """Удаление задачи пользователя"""
     try:
         task = get_task_id(id, user_id)
