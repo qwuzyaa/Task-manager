@@ -156,7 +156,6 @@ def delete_user_id(id):
     con.commit()
     con.close()
 
-
 #Для таблицы TASKS
 #Добавление записи
 def create_task(user_id, name, description, status, limit_time):

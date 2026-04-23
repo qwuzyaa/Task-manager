@@ -1,8 +1,11 @@
 from fastapi import FastAPI, HTTPException, Header, Depends, status
 from functions import *
 from schemes import *
+import uvicorn
 
 app = FastAPI()
+
+admin_key = 'Task-manager-admin'
 
 '''
 def get_current_user_id(x_user_id: int = Header(..., alias="X-User-Id")) -> int:
@@ -17,7 +20,7 @@ def get_current_user_id(x_user_id: int = Header(..., alias="X-User-Id")) -> int:
 def root():
     return {"message": "Hello World"}
 
-@app.post("/register", response_model=OutputUser, status_code=status.HTTP_201_CREATED)
+@app.post("/register", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_201_CREATED)
 def register_user(user: CreateUser):
     """Регистрация пользователя"""
     trying = get_user_username(user.username)
@@ -37,7 +40,7 @@ def register_user(user: CreateUser):
         created_time=u[4]
     )
 
-@app.post("/login", status_code=status.HTTP_200_OK)
+@app.post("/login", tags = ['User'], status_code=status.HTTP_200_OK)
 def login_user(user: LoginUser):
     """Вход пользователя"""
     u = get_user_username(user.username)
@@ -49,7 +52,7 @@ def login_user(user: LoginUser):
         "username": u[2]
     }
 
-@app.get("/users/{identificate}", response_model=OutputUser, status_code=status.HTTP_200_OK)
+@app.get("/users/{identificate}", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_200_OK)
 def get_by_id(identificate):
     """Информация о пользователе по username или по id"""
     if identificate.isdigit():
@@ -64,7 +67,7 @@ def get_by_id(identificate):
         created_time=user[4]
     )
 
-@app.get("/users/{name}/", response_model=list[OutputUser], status_code=status.HTTP_200_OK)
+@app.get("/users/{name}/", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
 def get_name(name: str):
     """Информация о пользователях по name"""
     users = get_user_name(name)
@@ -78,27 +81,28 @@ def get_name(name: str):
     ]
     return result
 
-@app.get("/users", response_model=list[OutputUser], status_code=status.HTTP_200_OK)
-def get_all():
+@app.get("/admin/users", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
+def get_all(key: str):
     """Информация о всех пользователях"""
-    users = get_all_users_v2()
-    result = [
-        OutputUser(id=user[0],
-                   name=user[1],
-                   username=user[2],
-                   password=user[3],
-                   created_time=user[4])
-        for user in users
-    ]
-    return result
+    if key == admin_key:
+        users = get_all_users_v2()
+        result = [
+            OutputUser(id=user[0],
+                       name=user[1],
+                       username=user[2],
+                       password=user[3],
+                       created_time=user[4])
+            for user in users
+        ]
+        return result
 
-@app.delete("/users/{username}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/users/{username}",tags = ['User'], status_code=status.HTTP_200_OK)
 def delete_u(username: str):
     """Удалить пользователя"""
     delete_user(username)
-    #return {"message": f"User {username} deleted"}
+    return {"message": f"User {username} deleted"}
 
-@app.put("/users/{user.id}", response_model=OutputUser)
+@app.put("/users/{user.id}", tags = ['User'], response_model=OutputUser)
 def update_u(user: UpdateUser):
     """Обновить данные пользователя"""
     u = update_user(user.id, user.name, user.username, user.password)
@@ -110,7 +114,7 @@ def update_u(user: UpdateUser):
         created_time=u[4]
     )
 
-@app.post("/tasks", response_model=OutputTask, status_code=status.HTTP_201_CREATED)
+@app.post("/tasks", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_201_CREATED)
 def create_t(task: CreateTask):
     """Создание задачи"""
     task = create_task(task.user_id, task.name, task.description, task.status, task.limit_time)
@@ -122,7 +126,7 @@ def create_t(task: CreateTask):
                    limit_time=task[5],
                    created_time=task[6])
 
-@app.get("/tasks/{user_id}", response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+@app.get("/tasks/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_all_tasks(user_id: int):
     """Получить все задачи пользователя"""
     tasks = get_tasks(user_id)
@@ -140,7 +144,7 @@ def get_all_tasks(user_id: int):
     ]
     return result
 
-@app.get("/tasks/{user_id}/{name}", response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+@app.get("/tasks/{user_id}/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_tasks_by_name(user_id: int, name: str):
     """Получить задачу пользователя по названию"""
     tasks = get_task_name(name, user_id)
@@ -156,7 +160,7 @@ def get_tasks_by_name(user_id: int, name: str):
     ]
     return result
 
-@app.put("/tasks/{task.user_id}/{task.id}", response_model=OutputTask)
+@app.put("/tasks/{task.user_id}/{task.id}", tags = ['Task'], response_model=OutputTask)
 def update_t(task: UpdateTask):
     """Обновить данные о задаче"""
     t = update_task(task.id, task.user_id, task.name, task.description, task.status, task.limit_time)
@@ -168,8 +172,11 @@ def update_t(task: UpdateTask):
                       limit_time=t[5],
                       created_time=t[6])
 
-@app.delete("/tasks/{user_id}/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/tasks/{user_id}/{id}", tags = ['Task'], status_code=status.HTTP_204_NO_CONTENT)
 def delete_tasks(id: int,user_id: int):
     """Удаление задачи пользователя"""
     delete_task(id,user_id)
     #return {'message': 'Задача удалена'}
+
+if __name__ == '__main__':
+    uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)

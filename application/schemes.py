@@ -1,43 +1,134 @@
-from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
+from pydantic import BaseModel, Field, field_validator
+from typing import Optional, Literal
+import re
+import datetime
 
 class CreateUser(BaseModel):
-    name: str
-    username: str
-    password: int
+    name: str = Field(..., min_length=1, max_length=20)
+    username: str = Field(..., min_length=2, max_length=50)
+    password: str = Field(..., min_length=8)
+
+    @field_validator('name')
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+            raise ValueError('Name must not contain special characters')
+        if re.search(r'[0-9]', v):
+            raise ValueError('Name must not contain numbers')
+        if " " in v:
+            raise ValueError('Name must not contain spaces')
+        return v
+
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+            raise ValueError('Username must not contain special characters')
+        if " " in v:
+            raise ValueError('Username must not contain spaces')
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if not re.search(r'[A-Z]', v) or not re.search(r'[a-z]', v):
+            raise ValueError('Password must contain at least one letter')
+        if " " in v:
+            raise ValueError('Password must not contain spaces')
+        if  not re.search(r'[!@#$%^&*?]', v):
+            raise ValueError('Password must not contain at least one special character !@#$%^&*?')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('Password must not contain at least one number')
+        return v
 
 class LoginUser(BaseModel):
-    username: str
-    password: int
+    username: str = Field(...)
+    password: int = Field(...)
 
 class UpdateUser(BaseModel):
     id: int
-    name: Optional[str] = None
-    username: Optional[str] = None
-    password: Optional[int] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=20)
+    username: Optional[str] = Field(None, min_length=2, max_length=50)
+    password: Optional[int] = Field(None, min_length=8)
+
+    @field_validator('name')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+            raise ValueError('Name must not contain special characters')
+        if " " in v:
+            raise ValueError('Name must not contain spaces')
+        return v
+
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+            raise ValueError('Username must not contain special characters')
+        if " " in v:
+            raise ValueError('Username must not contain spaces')
+        return v
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if not re.search(r'[A-Z]', v) or not re.search(r'[a-z]', v):
+            raise ValueError('Password must contain at least one letter')
+        if " " in v:
+            raise ValueError('Password must not contain spaces')
+        if not re.search(r'[!@#$%^&*?]', v):
+            raise ValueError('Password must not contain at least one special character !@#$%^&*?')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('Password must not contain at least one number')
+        return v
 
 class OutputUser(BaseModel):
     id: int
     name: str
     username: str
-    password: int
+    #password: str
     created_time: str
 
 class CreateTask(BaseModel):
-    user_id: int
-    name: str
-    description: str
-    status: int
-    limit_time: str
+    user_id: int = Field(...)
+    name: str = Field(..., min_length=1, max_length=100)
+    description: str = Field(None, max_length=300)
+    status: Literal[0,1] = Field(default=0)
+    limit_time: str = Field(None)
+
+    @field_validator('limit_time')
+    @classmethod
+    def validate_username(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        try:
+            datetime.datetime.strptime(v, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError(f'Wrong format of {v}')
+        return v
 
 class UpdateTask(BaseModel):
     id: int
     user_id: int
-    name: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[int] = None
-    limit_time: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = Field(None, max_length=300)
+    status: Optional[Literal[0,1]] = Field(None)
+    limit_time: Optional[str] = Field(None)
+
+    @field_validator('limit_time')
+    @classmethod
+    def validate_username(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        try:
+            datetime.datetime.strptime(v, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError(f'Wrong format of {v}')
+        return v
 
 class OutputTask(BaseModel):
     id: int
