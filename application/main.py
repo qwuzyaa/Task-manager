@@ -28,9 +28,12 @@ def register_user(user: CreateUser):
         raise HTTPException(status_code=400, detail="User already exists")
 
     user_id = create_user(user.name, user.username, user.password)
+    if user_id is None:
+        raise HTTPException(status_code=500, detail="Failed to create user")
+
     u = get_user_id(user_id)
     if u is None:
-        raise HTTPException(status_code=500, detail="Failed to create user")
+        raise HTTPException(status_code=500, detail="User not found but created")
 
     return OutputUser(
         id=u[0],
@@ -58,6 +61,9 @@ def get_by_id(identificate):
         user = get_user_id(identificate)
     else:
         user = get_user_username(identificate)
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
     return OutputUser(
         id=user[0],
         name=user[1],
@@ -65,10 +71,13 @@ def get_by_id(identificate):
         created_time=user[3]
     )
 
+'''
 @app.get("/users/{name}/", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
 def get_name(name: str):
     """Информация о пользователях по name"""
     users = get_user_name(name)
+    if users is None:
+        raise HTTPException(status_code=404, detail="Users not found")
     result = [
         OutputUser(id = user[0],
                    name=user[1],
@@ -77,26 +86,41 @@ def get_name(name: str):
         for user in users
     ]
     return result
+'''
 
-@app.get("/admin/users", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
+@app.get("/admin/users", tags = ['User'], status_code=status.HTTP_200_OK)
 def get_all(key: str):
     """Информация о всех пользователях"""
-    if key == admin_key:
+    if key != admin_key:
+        raise HTTPException(status_code=401, detail="Unauthorized access")
+    else:
         users = get_all_users_v2()
-        result = [
-            OutputUser(id=user[0],
-                       name=user[1],
-                       username=user[2],
-                       created_time=user[3])
-            for user in users
-        ]
-        return result
+        if len(users)==0:
+            return {'message': 'No users exist'}
+        else:
+            result = [
+                OutputUser(id=user[0],
+                           name=user[1],
+                           username=user[2],
+                           created_time=user[3])
+                for user in users
+            ]
+            return result
 
 @app.delete("/users/{username}",tags = ['User'], status_code=status.HTTP_200_OK)
 def delete_u(username: str):
     """Удалить пользователя"""
-    delete_user(username)
-    return {"message": f"User {username} deleted"}
+    users = get_user_username(username)
+    if users is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        delete_user(username)
+        u = get_user_username(username)
+        if len(u) != 0:
+            raise HTTPException(status_code=500, detail="Cannot delete user")
+        else:
+            return {"message": f"User {username} deleted"}
+
 
 @app.put("/users/{user.id}", tags = ['User'], response_model=OutputUser)
 def update_u(user: UpdateUser):
@@ -173,5 +197,7 @@ def delete_tasks(id: int,user_id: int):
     delete_task(id,user_id)
     #return {'message': 'Задача удалена'}
 
+'''
 if __name__ == '__main__':
     uvicorn.run('main:app', host="127.0.0.1", port=8000, reload=True)
+'''
