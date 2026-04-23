@@ -36,8 +36,7 @@ def register_user(user: CreateUser):
         id=u[0],
         name=u[1],
         username=u[2],
-        password=u[3],
-        created_time=u[4]
+        created_time=u[3]
     )
 
 @app.post("/login", tags = ['User'], status_code=status.HTTP_200_OK)
@@ -63,8 +62,7 @@ def get_by_id(identificate):
         id=user[0],
         name=user[1],
         username=user[2],
-        password=user[3],
-        created_time=user[4]
+        created_time=user[3]
     )
 
 @app.get("/users/{name}/", tags = ['User'], response_model=list[OutputUser], status_code=status.HTTP_200_OK)
@@ -75,8 +73,7 @@ def get_name(name: str):
         OutputUser(id = user[0],
                    name=user[1],
                    username=user[2],
-                   password=user[3],
-                   created_time=user[4])
+                   created_time=user[3])
         for user in users
     ]
     return result
@@ -90,8 +87,7 @@ def get_all(key: str):
             OutputUser(id=user[0],
                        name=user[1],
                        username=user[2],
-                       password=user[3],
-                       created_time=user[4])
+                       created_time=user[3])
             for user in users
         ]
         return result
@@ -110,8 +106,7 @@ def update_u(user: UpdateUser):
         id=u[0],
         name=u[1],
         username=u[2],
-        password=u[3],
-        created_time=u[4]
+        created_time=u[3]
     )
 
 @app.post("/tasks", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_201_CREATED)

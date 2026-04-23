@@ -19,7 +19,7 @@ def create_user(name, username, password):
 def get_user_username(username):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM users WHERE username = ?''', (username,))
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE username = ?''', (username,))
     result = cur.fetchone()
     con.close()
     return result
@@ -28,7 +28,7 @@ def get_user_username(username):
 def get_user_name(name):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM users WHERE name = ?''', (name,))
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE name = ?''', (name,))
     result = cur.fetchall()
     con.close()
     return result
@@ -37,33 +37,15 @@ def get_user_name(name):
 def get_user_id(id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM users WHERE id = ?''', (id,))
+    cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,))
     result = cur.fetchone()
     con.close()
     return result
 
-#Информация о всех пользователях
-def get_all_users_v1():
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    admin = int(input('Введите пароль: '))
-    if admin == 123456789:
-        cur.execute('''SELECT * FROM users''')
-        result = cur.fetchall()
-        con.close()
-        for user in result:
-            return user
-    else:
-        cur.execute('''SELECT name, username FROM users''')
-        result = cur.fetchall()
-        con.close()
-        for user in result:
-            return user
-
 def get_all_users_v2():
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM users''')
+    cur.execute('''SELECT id, name, username, created_time FROM users''')
     result = cur.fetchall()
     con.close()
     return result
@@ -87,10 +69,10 @@ def update_user(id, name = None, username = None, password = None):
     if len(update)>0:
         params.append(id)
         cur.execute(f'''UPDATE users SET {','.join(update)} WHERE id = ?''', params )
-        user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
+        user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
         con.commit()
     else:
-        user = cur.execute('''SELECT * FROM users WHERE id = ?''', (id,)).fetchone()
+        user = cur.execute('''SELECT id, name, username, created_time FROM users WHERE id = ?''', (id,)).fetchone()
         con.commit()
     con.close()
     return user
