@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status, HTTPException, Header, Depends, APIRouter
-from functions import *
-from schemes import *
+from application.functions import *
+from application.schemes import *
 import sqlite3
 
 router = APIRouter()
