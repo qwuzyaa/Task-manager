@@ -1,5 +1,6 @@
-from fastapi import status, HTTPException, Header, Depends, APIRouter
+from fastapi import status, HTTPException, APIRouter
 from application.functions import *
+from typing import Optional
 from application.schemes import *
 import sqlite3
 
@@ -44,13 +45,13 @@ def login_user(user: LoginUser):
         if u is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No such user")
         else:
-            pas = get_user_pass(user.username)
+            pas = (get_pass(user.username))[0]
             if str(pas) != user.password:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid data")
         return {
-           "message": "Login successful",
-           "user_id": u[0],
-           "username": u[2]
+            "message": "Login successful",
+            "user_id": u[0],
+            "username": u[2]
         }
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -111,28 +112,34 @@ def delete_u(id: int):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.put("/api/users/{id}", tags = ['User'], response_model=OutputUser)
+@router.put("/api/users/{id}", tags = ['User'], response_model=Optional[OutputUser])
 def update_u(id: int, user: UpdateUser):
     """Обновить данные пользователя"""
     try:
+        if user.name is None and user.username is None and user.password is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nothing to update")
+        existing_user = get_user_id(id)
+        if existing_user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User with id={id} not found")
+        if user.username is not None:
+            user_with_same_username = get_user_username(user.username)
+            if user_with_same_username is not None and user_with_same_username[0] != id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"Username '{user.username}' is already in use by another user")
+        updated_user = update_user(id, user.name, user.username, user.password)
+        if updated_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,detail=f"User with id={id} not found after update")
         trying_1 = get_user_id(id)
         if trying_1 is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         if user.name is None and user.username is None and user.password is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nothing to update")
-        if user.username is not None:
-            if trying_1 is not None and trying_1[0] != id:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username is already in use")
-        else:
-            u = update_user(id, user.name, user.username, user.password)
-            if u is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-            return OutputUser(
-                id=u[0],
-                name=u[1],
-                username=u[2],
-                created_time=u[3]
-                )
+        return OutputUser(
+            id=updated_user[0],
+            name=updated_user[1],
+            username=updated_user[2],
+            created_time=updated_user[3]
+        )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

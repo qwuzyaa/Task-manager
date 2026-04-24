@@ -24,13 +24,22 @@ def get_user_username(username):
     return result
 
 #Получение пароля
-def get_user_pass(username):
+def get_pass(username):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''SELECT password FROM users WHERE username = ?''', (username,))
     result = cur.fetchone()
     con.close()
-    return result[0]
+    return result
+
+#Получение id
+def get_id(username, password):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT id FROM users WHERE username = ? AND password = ?''', (username, password))
+    result = cur.fetchone()
+    con.close()
+    return result
 
 #Информация о пользователях по имени
 def get_user_name(name):
@@ -60,7 +69,7 @@ def get_all_users_v2():
     return result
 
 #Обновление информации пользователя полностью
-def update_user(id, name = None, username = None, password = None):
+def update_user(id, name, username, password):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     update = []
@@ -128,14 +137,6 @@ def update_password_v2(id, password):
     return result
 
 #Удаление пользователя
-def delete_user(username):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    user_id = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
-    cur.execute('''DELETE FROM users WHERE id = ?''', (user_id,))
-    con.commit()
-    con.close()
-
 def delete_user_id(id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()

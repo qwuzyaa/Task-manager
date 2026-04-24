@@ -26,7 +26,7 @@ class CreateUser(BaseModel):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
-        if not re.search(r'[a-zA-Z]', v):
+        if not re.search(r'[a-zA-Zа-яА-Я]', v):
             raise ValueError('Username must contain letters')
         return v
 
@@ -70,6 +70,8 @@ class UpdateUser(BaseModel):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
+        if not re.search(r'[a-zA-Zа-яА-Я]', v):
+            raise ValueError('Username must contain letters')
         return v
 
     @field_validator('password')
