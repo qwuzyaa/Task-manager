@@ -8,9 +8,11 @@ router = APIRouter()
 
 admin_key = 'Task-manager-admin'
 
+'''
 @router.get("/")
 def root():
     return {"message": "Hello World"}
+'''
 
 @router.post("/api/register", tags = ['User'], response_model=OutputUser, status_code=status.HTTP_201_CREATED)
 def register_user(user: CreateUser):
