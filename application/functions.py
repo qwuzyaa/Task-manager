@@ -221,7 +221,7 @@ def update_name_task(id, name):
     print("Название обновлено")
 
 #Обновление описания задачи
-def update_name_task(id, description):
+def update_description_task(id, description):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''UPDATE tasks SET description = ? WHERE id = ?''', (description, id))
