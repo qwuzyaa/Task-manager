@@ -167,6 +167,12 @@ form {
     margin: 15px 0;
 }
 
+.toggle-icon {
+    width: 70px;    
+    height: 70px;   
+    object-fit: cover;
+}
+
 .toggle-box {
     position: absolute;
     width: 100%;
@@ -223,8 +229,8 @@ form {
 }
 
 .toggle-panel p {
-    margin-bottom: 13px;
-    margin-top: 60px;
+    margin-bottom: 19px;
+    margin-top: 40px;
 
 }
 
@@ -257,7 +263,7 @@ form {
     border-radius: 30px;
     padding: 30px;
     margin: 20px 0;
-    display: flex;
+    display: flex; 
     flex-direction: column;
 }
 
@@ -311,10 +317,12 @@ form {
     background: #e0dfdf;
 }
 
-.server-info i,
-.profile-info i {
-    font-size: 24px;
-    color: #163622;
+
+.logo {
+    width: 40px;      /* Ширина */
+    height: 40px;     /* Высота */
+    object-fit: cover;
+    border-radius: 7px;
 }
 
 .profile-info i {
@@ -325,6 +333,11 @@ form {
 .server-name,
 .profile-name {
     font-weight: bold;
+    margin: 2px;
+}
+
+.profile-name {
+    color: #4f2a2a;
 }
 
 .profile-info {
@@ -365,7 +378,7 @@ form {
 }
 
 .stat-card h3 {
-    font-size: 14px;
+    font-size: 16px;
     color: #163622;
     margin-bottom: 10px;
 }
