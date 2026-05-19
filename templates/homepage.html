@@ -12,7 +12,7 @@
             </div>
             <div class="profile-info">
                 <i class='bx bx-user-circle'></i>
-                <span class="name">Имя пользователя</span>
+                <span class="name">{{ user[1] }}</span>
                 <i class='bx bx-chevron-down'></i>
                 <div class="profile-dropdown-menu">
                     <div class="dropdown-item" onclick="location.href='/edituser'">
@@ -21,7 +21,7 @@
                     <div class="dropdown-item" onclick="location.href='/'">
                         <span class="name">ВЫЙТИ</span>
                     </div>
-                    <div class="dropdown-item">
+                    <div class="dropdown-item" onclick="deleteAccount()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
                 </div>
@@ -34,19 +34,19 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Всего</h3>
-                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-number" id="totalTasks">{{ total }}</div>
                 </div>
                 <div class="stat-card">
                     <h3>Выполнено</h3>
-                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-number" id="completedTasks">{{ completed }}</div>
                 </div>
                 <div class="stat-card">
                     <h3>Активных</h3>
-                    <div class="stat-number" id="activeTasks">0</div>
+                    <div class="stat-number" id="activeTasks">{{ active }}</div>
                 </div>
                 <div class="stat-card">
                     <h3>Просрочено</h3>
-                    <div class="stat-number" id="overdueTasks">0</div>
+                    <div class="stat-number" id="overdueTasks">{{ overdue }}</div>
                 </div>
             </div>
             <div class="filters-section">
@@ -83,14 +83,38 @@
                 </div>
             </div>
             <div class="tasks-grid" id="tasksGrid">
-                <div class="empty-state">Тут немного пусто</div>
+                {% if tasks %}
+                    {% for task in tasks %}
+                    <div class="task-card">
+                        <div class="task-card-header">
+                            <label class="checkbox-container">
+                                <input type="checkbox" 
+                                    class="task-checkbox" 
+                                    data-task-id="{{ task[0] }}"
+                                    {% if task[4] == 'done' %}checked{% endif %}
+                                    onchange="toggleTaskStatus(this)">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-label">Выполнено</span>
+                            </label>
+                        </div>
+                        <h3 class="task-name">{{ task[2] }}</h3>
+                        {% if task[3] %}
+                        <p class="task-description-preview">{{ task[3] }}</p>
+                        {% endif %}
+                        {% if task[5] %}
+                        <div class="task-deadline">
+                            <i class='bx bx-calendar'></i>
+                            <span>{{ task[5] }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">Тут немного пусто</div>
+                {% endif %}
             </div>
         </div>
     </div>
-    <style>
-        
-
-    </style>
     <script>
         const filterBtn = document.getElementById('filterBtn');
         const filterDropdown = document.getElementById('filterDropdown');
@@ -112,6 +136,21 @@
         function sortTasks(type) {
             console.log('Сортировка:', type);
             filterDropdown.classList.remove('show');
+        }
+
+        function deleteAccount() {
+            if (confirm('Вы уверены?')) {
+                fetch('/delete_account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                });
+            }
         }
     </script>
 </body>

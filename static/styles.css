@@ -337,11 +337,13 @@ form {
     position: absolute;
     top: 100%;
     margin-top: 10px;
+    left: auto;
+    right: 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 15px;
     box-shadow: 0 5px 15px #4f2a2a0c;
-    min-width: 235px;
+    min-width: 220px;
     z-index: 9999;
     overflow: visible;
     opacity: 0;

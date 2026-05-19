@@ -146,9 +146,10 @@ def delete_user_id(id):
 
 #Для таблицы TASKS
 #Добавление записи
-def create_task(user_id, name, description, status, limit_time):
+def create_task(user_id, name, description, limit_time):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
+    status = 0
     cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time) VALUES (?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now()))
     task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, cur.lastrowid)).fetchone()
     con.commit()

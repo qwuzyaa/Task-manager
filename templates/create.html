@@ -12,7 +12,7 @@
             </div>
             <div class="profile-info">
                 <i class='bx bx-user-circle'></i>
-                <span class="name">Имя пользователя</span>
+                <span class="name">{{ user[1] }}</span>
                 <i class='bx bx-chevron-down'></i>
                 <div class="profile-dropdown-menu">
                     <div class="dropdown-item" onclick="location.href='/edituser'">
@@ -21,7 +21,7 @@
                     <div class="dropdown-item" onclick="location.href='/'">
                         <span class="name">ВЫЙТИ</span>
                     </div>
-                    <div class="dropdown-item">
+                    <div class="dropdown-item" onclick="deleteAccount()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
             <div class="header-with-back">
                 <h1 class="text">Создать задачу</h1>
                 <button class="back-btn" onclick="location.href='/homepage'">
-                    <i class='bx bx-arrow-back'></i>Назад
+                    <i class='bx bx-arrow-back'></i>На главную
                 </button>
             </div>
         </div>
@@ -40,7 +40,7 @@
                 <form class="task-form" action="/create" method="POST">
                     <div class="form-group">
                         <label>Название задачи<span class="required">*</span></label>
-                        <input type="text" name="title" placeholder="Введите название задачи" required class="name">
+                        <input type="text" name="name" placeholder="Введите название задачи" required class="name">
                     </div>
 
                     <div class="form-group">
@@ -50,16 +50,31 @@
 
                     <div class="form-group">
                         <label>Срок выполнения</label>
-                        <input type="date" name="deadline" class="name">
+                        <input type="date" name="limit_time" class="name">
                     </div>
-
                     <div class="form-buttons">
                         <button type="submit" class="submit-btn">Создать задачу</button>
                         <button type="reset" class="reset-btn">Очистить</button>
                     </div>
-            </form>
+                </form>
             </div>
         </div>
     </div>
+    <script>
+        function deleteAccount() {
+            if (confirm('Вы уверены?')) {
+                fetch('/delete_account', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                });
+            }
+        }
+    </script>
 </body>
 {% endblock %}
