@@ -12,12 +12,23 @@
             </div>
             <div class="profile-info">
                 <i class='bx bx-user-circle'></i>
-                <span class="profile-name">Имя пользователя</span>
+                <span class="name">Имя пользователя</span>
                 <i class='bx bx-chevron-down'></i>
+                <div class="profile-dropdown-menu">
+                    <div class="dropdown-item" onclick="location.href='/edituser'">
+                        <span class="name">РЕДАКТИРОВАТЬ</span>
+                    </div>
+                    <div class="dropdown-item" onclick="location.href='/'">
+                        <span class="name">ВЫЙТИ</span>
+                    </div>
+                    <div class="dropdown-item">
+                        <span class="name">УДАЛИТЬ АККАУНТ</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="tasks-header">
-            <h1 class="text">Ваши задачи</h1>
+            <h1 class="text">Мои задачи</h1>
         </div>
         <div class="back">
             <div class="stats-grid">
@@ -46,10 +57,27 @@
                 </form>
                 <div class="search-wrapper">
                     <div class="filter-button">
-                        <button class="filter-btn" ><i class="bx bx-filter"></i></button>
+                        <button class="filter-btn" id="filterBtn">
+                            <i class="bx bx-filter"></i>
+                        </button>
+                        <div class="filter-dropdown" id="filterDropdown">
+                            <div class="filter-item" onclick="filterTasks('completed')">
+                                Завершенные
+                            </div>
+                            <div class="filter-item" onclick="filterTasks('in_progress')">
+                                В процессе
+                            </div>
+                            <div class="filter-divider"></div>
+                            <div class="filter-item" onclick="sortTasks('date_created')">
+                                По дате создания
+                            </div>
+                            <div class="filter-item" onclick="sortTasks('date_deadline')">
+                                По дате окончания
+                            </div>
+                        </div>
                     </div>
                     <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="        Найти задачу">
+                        <input type="text" id="searchInput" placeholder="         Найти задачу">
                         <i class="bx bx-search"></i>
                     </div>
                 </div>
@@ -59,5 +87,32 @@
             </div>
         </div>
     </div>
+    <style>
+        
+
+    </style>
+    <script>
+        const filterBtn = document.getElementById('filterBtn');
+        const filterDropdown = document.getElementById('filterDropdown');
+
+        filterBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            filterDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', function() {
+            filterDropdown.classList.remove('show');
+        });
+
+        function filterTasks(type) {
+            console.log('Фильтр:', type);
+            filterDropdown.classList.remove('show');
+        }
+
+        function sortTasks(type) {
+            console.log('Сортировка:', type);
+            filterDropdown.classList.remove('show');
+        }
+    </script>
 </body>
 {% endblock %}
