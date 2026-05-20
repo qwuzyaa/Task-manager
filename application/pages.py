@@ -16,7 +16,7 @@ def start_page(request: Request):
     return templates.TemplateResponse("startpage.html", {"request": request})
 
 @router.post("/")
-def handle(request: Request, form_type: str = Form(...), name: str = Form(None), username: str = Form(...),password: str = Form(...)):
+def start_page_forms(request: Request, form_type: str = Form(...), name: str = Form(None), username: str = Form(...),password: str = Form(...)):
     if form_type == "login":
         user = get_user_username(username)
         if user and get_pass(username)[0] == password:
@@ -39,20 +39,16 @@ def homepage(request: Request, search: str = ""):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-
     user = get_user_id(int(user_id))
     all_tasks = get_tasks(int(user_id))
-
     if search:
         print(search)
         tasks = get_task_name(search, int(user_id))
     else:
         tasks = all_tasks
-
     total = len(all_tasks)
     active = len([i for i in all_tasks if i[4] == 0])
     completed = len([i for i in all_tasks if i[4] == 1])
-
     today = datetime.now().date()
     overdue = 0
     for i in all_tasks:
@@ -61,7 +57,6 @@ def homepage(request: Request, search: str = ""):
             deadline = datetime.strptime(limit_time, "%Y-%m-%d").date()
             if deadline < today:
                 overdue += 1
-
     return templates.TemplateResponse("homepage.html", {
         "request": request,
         "user": user,
@@ -78,9 +73,7 @@ def update_task_status(task_id: int, request: Request, status: int = Form(...)):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-
     update_status(task_id, status)
-
     return RedirectResponse(request.headers.get("referer", "/homepage"), status_code=303)
 
 @router.delete("/delete_user")
@@ -117,9 +110,7 @@ def edit_user_page(request: Request):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-
-    user = get_user_id(int(user_id))  # получаем пользователя
-
+    user = get_user_id(int(user_id))
     return templates.TemplateResponse("edituser.html", {
         "request": request,
         "user": user
@@ -130,8 +121,6 @@ def edit_user_submit(request: Request,name1: str = Form(None),username1: str = F
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-    user = get_user_id(int(user_id))
-    stored_pass = get_pass(user[2])
     update_user(user_id, name1, username1, newpassword)
     return RedirectResponse("/homepage", status_code=303)
 
@@ -140,10 +129,8 @@ def edit_task_page(request: Request, task_id: int):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-
     user = get_user_id(int(user_id))
     task = get_task_id(task_id, int(user_id))
-
     return templates.TemplateResponse("edittask.html", {
         "request": request,
         "user": user,
@@ -155,7 +142,6 @@ def edit_task(request: Request,task_id: int,name: str = Form(),description: str 
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
-
     update_task(task_id, int(user_id), name, description, None, limit_time)
     return RedirectResponse("/homepage", status_code=303)
 
