@@ -81,7 +81,7 @@ h1.text {
     height: 100%;
     display: flex;
     align-items: center;
-    color: #151515;
+    color: #163622;
     text-align: center;
     padding: 40px;
     z-index: 1;
@@ -114,7 +114,6 @@ h1.text {
 }
 
 form {
-    /*background: purple;*/
     width: 100%;
 }
 
@@ -253,22 +252,19 @@ form {
     padding: 10px;
 }
 
-.tasks-container, .tasks-container-edited {
+.tasks-container, 
+.tasks-container-edited {
     position: relative;
     width: 1480px;
-    max-width: 95%;
-    min-height: 100vh;
+    max-width: calc(100% - 40px);
     background: rgba(240, 248, 255, 0.85);
     backdrop-filter: blur(12px);
     border-radius: 30px;
     padding: 30px;
-    margin: 20px 0;
+    margin: 25px auto;
     display: flex; 
     flex-direction: column;
-}
-
-.tasks-container-edited {
-    min-height: 92vh;
+    min-height: calc(100vh - 40px);
 }
 
 .back, .back-edit {
@@ -287,7 +283,17 @@ form {
 .back-edit {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
-    box-shadow: 0 5px 15px #4f2a2a0c;
+    border-radius: 25px;
+    padding: 16px;
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.back-edit .form-groups {
+    flex: 1;
 }
 
 .tasks-header {
@@ -352,12 +358,12 @@ form {
 }
 
 .server-profile-bar {
-    overflow: visible; /* Добавить */
-    z-index: 10; /* Добавить */
+    overflow: visible;
+    z-index: 10;
 }
 
 .tasks-container {
-    overflow: visible; /* Добавить */
+    overflow: visible;
 }
 
 .profile-info:hover .profile-dropdown-menu {
@@ -462,14 +468,19 @@ form {
 }
 
 .filter-button,
-.create-button {
+.create-button,
+.clear-button,
+.task-edit-buttons {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
 }
 
 .filter-btn,
-.create-btn {
+.create-btn,
+.clear-btn,
+.delete-task-btn,
+.edit-task-btn {
     background: #163622;
     border: none;
     padding: 10px 20px;
@@ -481,7 +492,11 @@ form {
     transition: background 0.3s ease;
 }
 
-.filter-btn:hover, .create-btn:hover {
+.filter-btn:hover, 
+.create-btn:hover, 
+.clear-btn:hover, 
+.delete-task-btn:hover, 
+.edit-task-btn:hover {
     background: rgb(56, 81, 43);
 }
 
@@ -498,7 +513,6 @@ form {
 .search-box input {
     width: 250px;
     padding: 10px 35px 10px 15px;
-    /* Место для лупы справа */
     background: #cac8c8b7;
     border-radius: 8px;
     border: 2px solid #ffffffe1;
@@ -670,7 +684,8 @@ form {
     border: none;
 }
 
-.submit-btn, .reset-btn {
+.submit-btn, 
+.reset-btn {
     flex: 1;
     padding: 10px;
     border-radius: 8px;

@@ -21,7 +21,7 @@
                     <div class="dropdown-item" onclick="location.href='/'">
                         <span class="name">ВЫЙТИ</span>
                     </div>
-                    <div class="dropdown-item" onclick="deleteAccount()">
+                    <div class="dropdown-item" onclick="deleteUser()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
                 </div>
@@ -77,36 +77,44 @@
                         </div>
                     </div>
                     <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="         Найти задачу">
-                        <i class="bx bx-search"></i>
+                        <form action="/homepage" method="GET" id="searchForm">
+                            <input type="text" name="search" id="searchInput" placeholder="         Найти задачу" value="{{ search_query if search_query else '' }}">
+                            <i class="bx bx-search"></i>
+                        </form>
+                    </div>
+                    <div class="clear-button">
+                        <button type="submit" class="clear-btn" onclick="location.href='/homepage'">Вернуть</button>
                     </div>
                 </div>
             </div>
             <div class="tasks-grid" id="tasksGrid">
                 {% if tasks %}
                     {% for task in tasks %}
-                    <div class="task-card">
-                        <div class="task-card-header">
-                            <label class="checkbox-container">
-                                <input type="checkbox" 
-                                    class="task-checkbox" 
-                                    data-task-id="{{ task[0] }}"
-                                    {% if task[4] == 'done' %}checked{% endif %}
-                                    onchange="toggleTaskStatus(this)">
-                                <span class="checkmark"></span>
-                                <span class="checkbox-label">Выполнено</span>
-                            </label>
+                    <div class="task-container">
+                        <div class="task-edit-buttons">
+                            <button class="delete-task-btn" onclick="deleteTask({{ task[1] }})"><i class="bx bx-trash"></i></button>
+                            <button class="edit-task-btn" onclick="location.href='/edittask?task_id={{ task[1] }}'">
+                                <i class="bx bx-pencil"></i>
+                            </button>
                         </div>
-                        <h3 class="task-name">{{ task[2] }}</h3>
-                        {% if task[3] %}
-                        <p class="task-description-preview">{{ task[3] }}</p>
-                        {% endif %}
-                        {% if task[5] %}
-                        <div class="task-deadline">
-                            <i class='bx bx-calendar'></i>
-                            <span>{{ task[5] }}</span>
+                        <div class="task-card">
+                            <h2 class="task-name">{{ task[2] }}</h2>
+                            {% if task[3] %}
+                            <p class="task-description-preview">{{ task[3] }}</p>
+                            {% endif %}
+                            <div class="task-card-header">
+                                <form action="/update_task_status/{{ task[1] }}" method="POST">
+                                    <input type="hidden" name="status" value="{% if task[4] == 1 %}0{% else %}1{% endif %}">
+                                    <button type="submit" class="status-btn">{% if task[4] == 1 %}Выполнено{% else %}Не выполнено{% endif %}</button>
+                                </form>
+                            </div>
+                            {% if task[5] %}
+                            <div class="task-deadline">
+                                <i class='bx bx-calendar'></i>
+                                <span>{{ task[5] }}</span>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                     {% endfor %}
                 {% else %}
@@ -138,9 +146,9 @@
             filterDropdown.classList.remove('show');
         }
 
-        function deleteAccount() {
+        function deleteUser() {
             if (confirm('Вы уверены?')) {
-                fetch('/delete_account', {
+                fetch('/delete_user', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
@@ -152,6 +160,20 @@
                 });
             }
         }
+
+        function deleteTask(taskId) {
+            fetch(`/delete_task?task_id=` + taskId, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = '/homepage';
+                }
+            });
+        }
+
     </script>
 </body>
 {% endblock %}

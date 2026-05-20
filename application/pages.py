@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from application.functions import *
 
-router = APIRouter(tags=['pages'])
+router = APIRouter(tags=['Pages'])
 
 templates = Jinja2Templates(directory='templates')
 
@@ -35,21 +35,27 @@ def handle(request: Request, form_type: str = Form(...), name: str = Form(None),
         return response
 
 @router.get("/homepage")
-def homepage(request: Request):
+def homepage(request: Request, search: str = ""):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
 
     user = get_user_id(int(user_id))
-    tasks = get_tasks(user[0])
+    all_tasks = get_tasks(int(user_id))
 
-    total = len(tasks)
-    active = len([i for i in tasks if i[4] == 0])
-    completed = len([i for i in tasks if i[4] == 1])
+    if search:
+        print(search)
+        tasks = get_task_name(search, int(user_id))
+    else:
+        tasks = all_tasks
+
+    total = len(all_tasks)
+    active = len([i for i in all_tasks if i[4] == 0])
+    completed = len([i for i in all_tasks if i[4] == 1])
 
     today = datetime.now().date()
     overdue = 0
-    for i in tasks:
+    for i in all_tasks:
         limit_time = i[5]
         if limit_time and i[4] != 1:
             deadline = datetime.strptime(limit_time, "%Y-%m-%d").date()
@@ -63,11 +69,22 @@ def homepage(request: Request):
         "total": total,
         "completed": completed,
         "active": active,
-        "overdue": overdue
+        "overdue": overdue,
+        "search": search
     })
 
-@router.delete("/delete_account")
-def delete_account(request: Request):
+@router.post("/update_task_status/{task_id}")
+def update_task_status(task_id: int, request: Request, status: int = Form(...)):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/")
+
+    update_status(task_id, status)
+
+    return RedirectResponse(request.headers.get("referer", "/homepage"), status_code=303)
+
+@router.delete("/delete_user")
+def delete_user_button(request: Request):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
@@ -105,18 +122,48 @@ def edit_user_page(request: Request):
 
     return templates.TemplateResponse("edituser.html", {
         "request": request,
-        "user": user  # передаём user в шаблон
+        "user": user
     })
 
+@router.post("/edituser")
+def edit_user_submit(request: Request,name1: str = Form(None),username1: str = Form(None),oldpassword: str = Form(None),newpassword: str = Form(None)):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/")
+    user = get_user_id(int(user_id))
+    stored_pass = get_pass(user[2])
+    update_user(user_id, name1, username1, newpassword)
+    return RedirectResponse("/homepage", status_code=303)
+
 @router.get("/edittask", response_class=HTMLResponse)
-def edit_task_page(request: Request):
+def edit_task_page(request: Request, task_id: int):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
 
-    user = get_user_id(int(user_id))  # получаем пользователя
+    user = get_user_id(int(user_id))
+    task = get_task_id(task_id, int(user_id))
 
     return templates.TemplateResponse("edittask.html", {
         "request": request,
-        "user": user  # передаём user в шаблон
+        "user": user,
+        "task": task
     })
+
+@router.post("/edittask")
+def edit_task(request: Request,task_id: int,name: str = Form(),description: str = Form(""),limit_time: str = Form(None)):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/")
+
+    update_task(task_id, int(user_id), name, description, None, limit_time)
+    return RedirectResponse("/homepage", status_code=303)
+
+@router.delete("/delete_task")
+def delete_task_button(request: Request, task_id: int):
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        return RedirectResponse("/")
+    delete_task(task_id, int(user_id))
+    response = RedirectResponse("/homepage", status_code=303)
+    return response
