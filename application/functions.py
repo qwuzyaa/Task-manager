@@ -3,7 +3,7 @@ from datetime import datetime
 
 DB_PATH = r"C:\Users\User\Task-manager\database\task_m.db"
 
-#Для таблицы USERS
+"""Пользователь"""
 #Добавление пользователя
 def create_user(name, username, password):
     con = sqlite3.connect(DB_PATH)
@@ -144,7 +144,7 @@ def delete_user_id(id):
     con.commit()
     con.close()
 
-#Для таблицы TASKS
+"""Задачи"""
 #Добавление записи
 def create_task(user_id, name, description, limit_time):
     con = sqlite3.connect(DB_PATH)
@@ -282,3 +282,47 @@ def delete_task(id, user_id):
     con.commit()
     con.close()
 
+"""Фильтрация"""
+#Завершенные
+def get_tasks_complited(user_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND status = 1''', (user_id,))
+    result = cur.fetchall()
+    con.close()
+    return result
+
+#В процессе
+def get_tasks_active(user_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND status = 0''', (user_id,))
+    result = cur.fetchall()
+    con.close()
+    return result
+
+#Просроченные
+def get_tasks_over(user_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    today = datetime.now().date()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND status = 0 GROUP BY limit_time ORDER BY limit_time''', (user_id,))
+    tasks = cur.fetchall()
+    con.close()
+    result = []
+    for i in tasks:
+        limit_time = i[5]
+        if limit_time and i[4] != 1:
+            deadline = datetime.strptime(limit_time, "%Y-%m-%d").date()
+            if deadline < today:
+                result.append(i)
+    return result
+
+#По дате окончания
+def get_tasks_limit(user_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? GROUP BY limit_time ORDER BY limit_time''', (user_id,))
+    result = cur.fetchall()
+    con.close()
+    return result

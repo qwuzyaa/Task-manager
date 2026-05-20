@@ -138,7 +138,7 @@ def edit_task_page(request: Request, task_id: int):
     })
 
 @router.post("/edittask")
-def edit_task(request: Request,task_id: int,name: str = Form(),description: str = Form(""),limit_time: str = Form(None)):
+def edit_task(request: Request,task_id: int,name: str = Form(None),description: str = Form(""),limit_time: str = Form(None)):
     user_id = request.cookies.get("user_id")
     if not user_id:
         return RedirectResponse("/")
