@@ -185,17 +185,26 @@ def edit_user_submit(request: Request,name: str = Form(None),username: str = For
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             return response
         user = get_user_id(int(user_id))
-        if oldpassword:
+        try:
+            update_data = UpdateUser(name=name, username=username, password=newpassword)
+        except ValidationError:
+            return RedirectResponse("/edituser", status_code=303)
+        if update_data.password:
             current_password = get_pass(user[2])
-            if not current_password or current_password[0] != oldpassword:
-                pass
-            else:
-                update_user(int(user_id), None, None, newpassword)
+            if current_password and current_password[0] == oldpassword:
+                update_user(int(user_id), None, None, update_data.password)
                 return RedirectResponse("/homepage", status_code=303)
+            return RedirectResponse("/edituser", status_code=303)
+        if username and username != user[2]:
+            existing_user = get_user_username(username)
+            if existing_user:
+                return RedirectResponse("/edituser", status_code=303)
         if name or username:
-            update_user(int(user_id), name, username, None)
+            update_user(int(user_id), update_data.name, update_data.username, None)
             return RedirectResponse("/homepage", status_code=303)
-    except Exception:
+        return RedirectResponse("/homepage", status_code=303)
+    except Exception as e:
+        print(f"ОШИБКА: {e}")
         return RedirectResponse("/errorpage")
 
 @router.get("/edittask", response_class=HTMLResponse)
