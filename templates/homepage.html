@@ -18,9 +18,11 @@
                     <div class="dropdown-item" onclick="location.href='/edituser'">
                         <span class="name">РЕДАКТИРОВАТЬ</span>
                     </div>
-                    <div class="dropdown-item" onclick="location.href='/'">
-                        <span class="name">ВЫЙТИ</span>
-                    </div>
+                    <form action="/logout" method="POST">
+                        <button type="submit" class="dropdown-item" style="cursor: pointer; background: none;width: 100%; text-align: left; border: none;">
+                            <span class="name">ВЫЙТИ</span>
+                        </button>
+                    </form>
                     <div class="dropdown-item" onclick="deleteUser()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
@@ -61,17 +63,17 @@
                             <i class="bx bx-filter"></i>
                         </button>
                         <div class="filter-dropdown" id="filterDropdown">
-                            <div class="filter-item" onclick="filterTasks('completed')">
+                            <div class="filter-item" onclick="applyFilter('completed')">
                                 Завершенные
                             </div>
-                            <div class="filter-item" onclick="filterTasks('in_progress')">
+                            <div class="filter-item" onclick="applyFilter('in_progress')">
                                 В процессе
                             </div>
                             <div class="filter-divider"></div>
-                            <div class="filter-item" onclick="sortTasks('date_created')">
+                            <div class="filter-item" onclick="applyFilter('over')">
                                 Просроченные
                             </div>
-                            <div class="filter-item" onclick="sortTasks('date_deadline')">
+                            <div class="filter-item" onclick="applyFilter('limit')">
                                 По дате окончания
                             </div>
                         </div>
@@ -92,6 +94,12 @@
                     {% for task in tasks %}
                     <div class="task-container">
                         <div class="task-edit-buttons">
+                            <div class="task-card-header">
+                                <form action="/update_task_status/{{ task[1] }}" method="POST">
+                                    <input type="hidden" name="status" value="{% if task[4] == 1 %}0{% else %}1{% endif %}">
+                                    <button type="submit" class="status-btn">{% if task[4] == 1 %}Выполнено{% else %}Не выполнено{% endif %}</button>
+                                </form>
+                            </div>
                             <button class="delete-task-btn" onclick="deleteTask({{ task[1] }})"><i class="bx bx-trash"></i></button>
                             <button class="edit-task-btn" onclick="location.href='/edittask?task_id={{ task[1] }}'">
                                 <i class="bx bx-pencil"></i>
@@ -102,12 +110,6 @@
                             {% if task[3] %}
                             <p class="task-description-preview">{{ task[3] }}</p>
                             {% endif %}
-                            <div class="task-card-header">
-                                <form action="/update_task_status/{{ task[1] }}" method="POST">
-                                    <input type="hidden" name="status" value="{% if task[4] == 1 %}0{% else %}1{% endif %}">
-                                    <button type="submit" class="status-btn">{% if task[4] == 1 %}Выполнено{% else %}Не выполнено{% endif %}</button>
-                                </form>
-                            </div>
                             {% if task[5] %}
                             <div class="task-deadline">
                                 <i class='bx bx-calendar'></i>
@@ -118,6 +120,7 @@
                     </div>
                     {% endfor %}
                 {% else %}
+                    <div class="empty-state1" style="color: rgb(209, 202, 206);">Тут немного пусто</div>
                     <div class="empty-state">Тут немного пусто</div>
                 {% endif %}
             </div>
@@ -135,17 +138,11 @@
         document.addEventListener('click', function() {
             filterDropdown.classList.remove('show');
         });
-
-        function filterTasks(type) {
-            console.log('Фильтр:', type);
-            filterDropdown.classList.remove('show');
+        
+        function applyFilter(type) {
+            window.location.href = `/homepage?filter=${type}`;
         }
-
-        function sortTasks(type) {
-            console.log('Сортировка:', type);
-            filterDropdown.classList.remove('show');
-        }
-
+    
         function deleteUser() {
             if (confirm('Вы уверены?')) {
                 fetch('/delete_user', {
@@ -173,7 +170,6 @@
                 }
             });
         }
-
     </script>
 </body>
 {% endblock %}

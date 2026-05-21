@@ -18,7 +18,7 @@ def create_tables():
         name TEXT NOT NULL,
         description TEXT,
         status INTEGER DEFAULT 0, 
-        limit_time TEXT,
+        limit_time TEXT DEFAULT NULL,
         created_time TEXT NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users (id)
     );

@@ -18,9 +18,11 @@
                     <div class="dropdown-item" onclick="location.href='/edituser'">
                         <span class="name">РЕДАКТИРОВАТЬ</span>
                     </div>
-                    <div class="dropdown-item" onclick="location.href='/'">
-                        <span class="name">ВЫЙТИ</span>
-                    </div>
+                    <form action="/logout" method="POST">
+                        <button type="submit" class="dropdown-item" style="cursor: pointer; background: none;width: 100%; text-align: left; border: none;">
+                            <span class="name">ВЫЙТИ</span>
+                        </button>
+                    </form>
                     <div class="dropdown-item" onclick="deleteAccount()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
@@ -40,17 +42,17 @@
                 <form class="task-form" action="/edittask?task_id={{ task[1] }}" method="POST">
                     <div class="form-group">
                         <label>Название задачи</label>
-                        <input type="text" name="name" placeholder="Введите название задачи" class="name">
+                        <input type="text" name="name" value="{{ task[2] }}" placeholder="Введите название задачи" class="name">
                     </div>
 
                     <div class="form-group">
                         <label>Описание</label>
-                        <textarea name="description" rows="3" placeholder="Введите описание задачи" class="name"></textarea>
+                        <textarea name="description" rows="3" placeholder="Введите описание задачи" class="name">{{ task[3] or '' }}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label>Срок выполнения</label>
-                        <input type="date" name="limit_time" class="name">
+                        <input type="date" name="limit_time" value="{{ task[5] }}" class="name">
                     </div>
 
                     <div class="form-buttons">

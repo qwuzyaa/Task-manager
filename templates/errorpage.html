@@ -3,5 +3,20 @@
 {% block title %}Создание задачи{% endblock %}
 
 {% block content %}
-
+<body class="firstpage">
+    <div>
+        <video autoplay muted loop id="myVideo">
+            <source src="/static/images/background1.mp4" type="video/mp4">
+        </video>
+    </div>
+    <div class="container-error">
+        <div class="error-text">
+            <h1>Oops...</h1>
+            <h3>Something went wrong, come back soon</h3>
+            <button class="back-btn" onclick="location.href='/homepage'">
+                <i class='bx bx-arrow-back'></i>
+            </button>
+        </div>
+    </div>
+</body>
 {% endblock %}

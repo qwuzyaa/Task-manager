@@ -15,9 +15,11 @@
                 <span class="name">{{ user[1] }}</span>
                 <i class='bx bx-chevron-down'></i>
                 <div class="profile-dropdown-menu">
-                    <div class="dropdown-item" onclick="location.href='/'">
-                        <span class="name">ВЫЙТИ</span>
-                    </div>
+                    <form action="/logout" method="POST">
+                        <button type="submit" class="dropdown-item" style="cursor: pointer; background: none;width: 100%; text-align: left; border: none;">
+                            <span class="name">ВЫЙТИ</span>
+                        </button>
+                    </form>
                     <div class="dropdown-item" onclick="deleteAccount()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
@@ -37,11 +39,11 @@
                 <form class="task-form" action="/edituser" method="POST">
                     <div class="form-group">
                         <label>Новое имя пользователя</label>
-                        <input type="text" name="name1" placeholder="Введите имя" class="name">
+                        <input type="text" name="name" placeholder="Введите имя" class="name">
                     </div>
                     <div class="form-group">
                         <label>Новый username</label>
-                        <input type="text" name="username1" placeholder="Введите username" class="name">
+                        <input type="text" name="username" placeholder="Введите username" class="name">
                     </div>
                     <div class="password-row">
                         <div class="form-group">
@@ -53,7 +55,9 @@
                             <input type="password" name="newpassword" placeholder="Введите новый пароль" class="name">
                         </div>
                     </div>
-
+                    <div class="information">
+                        <p style="font-size: 14px;">Если хотите обновить пароль, введите старый. Внимание: новый пароль должен быть не менее 8 символов, содержать буквы, цифры и спецсимволы</p>
+                    </div>
                     <div class="form-buttons">
                         <button type="submit" class="submit-btn">Сохранить изменения</button>
                         <button type="reset" class="reset-btn">Очистить</button>

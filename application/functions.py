@@ -160,7 +160,7 @@ def create_task(user_id, name, description, limit_time):
 def get_tasks(user_id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM tasks WHERE user_id = ?''', (user_id,))
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? GROUP BY id ORDER BY id DESC''', (user_id,))
     result = cur.fetchall()
     con.close()
     return result
@@ -169,7 +169,7 @@ def get_tasks(user_id):
 def get_task_name(name, user_id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND name = ?''', (user_id, name))
+    cur.execute("SELECT * FROM tasks WHERE user_id = ? AND name = ?", (user_id, name))
     result = cur.fetchall()
     con.close()
     return result
@@ -198,7 +198,9 @@ def update_task(id, user_id, name, description, status, limit_time):
     if status is not None:
         update.append('status = ?')
         params.append(status)
-    if limit_time is not None:
+    if limit_time is None:
+        update.append('limit_time = NULL')
+    elif limit_time is not None:
         update.append('limit_time = ?')
         params.append(limit_time)
     if len(update) > 0:
@@ -323,6 +325,7 @@ def get_tasks_limit(user_id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''SELECT * FROM tasks WHERE user_id = ? GROUP BY limit_time ORDER BY limit_time''', (user_id,))
-    result = cur.fetchall()
+    tasks = cur.fetchall()
     con.close()
+    result = [task for task in tasks if task[5]!=None]
     return result

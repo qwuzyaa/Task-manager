@@ -59,6 +59,8 @@ class UpdateUser(BaseModel):
     def validate_name(cls, v: str) -> str:
         if re.search(r'[!@":;№()/|#$%^&*?]', v):
             raise ValueError('Name must not contain special characters')
+        if re.search(r'[0-9]', v):
+            raise ValueError('Name must not contain numbers')
         if " " in v:
             raise ValueError('Name must not contain spaces')
         return v

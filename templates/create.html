@@ -18,9 +18,11 @@
                     <div class="dropdown-item" onclick="location.href='/edituser'">
                         <span class="name">РЕДАКТИРОВАТЬ</span>
                     </div>
-                    <div class="dropdown-item" onclick="location.href='/'">
-                        <span class="name">ВЫЙТИ</span>
-                    </div>
+                    <form action="/logout" method="POST">
+                        <button type="submit" class="dropdown-item" style="cursor: pointer; background: none;width: 100%; text-align: left; border: none;">
+                            <span class="name">ВЫЙТИ</span>
+                        </button>
+                    </form>
                     <div class="dropdown-item" onclick="deleteAccount()">
                         <span class="name">УДАЛИТЬ АККАУНТ</span>
                     </div>
