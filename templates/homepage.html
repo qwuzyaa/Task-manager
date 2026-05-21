@@ -58,6 +58,22 @@
                     </div>
                 </form>
                 <div class="search-wrapper">
+                    <div class="priority-filter-button">
+                        <button class="filter-btn" id="priorityFilterBtn">
+                            Приоритет
+                        </button>
+                        <div class="priority-filter-dropdown" id="priorityFilterDropdown">
+                            <div class="filter-item-low" onclick="applyFilter('priority_low')">
+                                Низкий
+                            </div>
+                            <div class="filter-item-med" onclick="applyFilter('priority_med')">
+                                Средний
+                            </div>
+                            <div class="filter-item-high" onclick="applyFilter('priority_high')">
+                                Высокий
+                            </div>
+                        </div>
+                    </div>
                     <div class="filter-button">
                         <button class="filter-btn" id="filterBtn">
                             <i class="bx bx-filter"></i>
@@ -75,7 +91,7 @@
                             </div>
                             <div class="filter-item" onclick="applyFilter('limit')">
                                 По дате окончания
-                            </div>
+                            </div>    
                         </div>
                     </div>
                     <div class="search-box">
@@ -98,6 +114,26 @@
                                 <form action="/update_task_status/{{ task[1] }}" method="POST">
                                     <input type="hidden" name="status" value="{% if task[4] == 1 %}0{% else %}1{% endif %}">
                                     <button type="submit" class="status-btn">{% if task[4] == 1 %}Выполнено{% else %}Не выполнено{% endif %}</button>
+                                </form>
+                            </div>
+                            <div class="task-priority-section">
+                                <form action="/update_task_priority/{{ task[1] }}" method="POST" class="priority-form">
+                                    <input type="hidden" name="priority" value="
+                                        {% if task[7] == 0 %}1
+                                        {% elif task[7] == 1 %}2
+                                        {% elif task[7] == 2 %}0
+                                        {% endif %}
+                                    ">
+                                    <button type="submit" class="priority-btn 
+                                        {% if task[7] == 0 %}priority-low
+                                        {% elif task[7] == 1 %}priority-med
+                                        {% elif task[7] == 2 %}priority-high
+                                        {% endif %}">
+                                        {% if task[7] == 0 %}.
+                                        {% elif task[7] == 1 %}.
+                                        {% elif task[7] == 2 %}.
+                                        {% endif %}
+                                    </button>
                                 </form>
                             </div>
                             <button class="delete-task-btn" onclick="deleteTask({{ task[1] }})"><i class="bx bx-trash"></i></button>
@@ -142,6 +178,22 @@
         function applyFilter(type) {
             window.location.href = `/homepage?filter=${type}`;
         }
+
+        const priorityFilterBtn = document.getElementById('priorityFilterBtn');
+        const priorityFilterDropdown = document.getElementById('priorityFilterDropdown');
+
+        if (priorityFilterBtn) {
+            priorityFilterBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                priorityFilterDropdown.classList.toggle('show');
+            });
+        }
+
+        document.addEventListener('click', function() {
+            if (priorityFilterDropdown) {
+                priorityFilterDropdown.classList.remove('show');
+            }
+        });
     
         function deleteUser() {
             if (confirm('Вы уверены?')) {

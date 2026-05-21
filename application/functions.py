@@ -9,10 +9,19 @@ def create_user(name, username, password):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''INSERT INTO users (name, username, password, created_time) VALUES (?, ?, ?, ?)''', (name, username, password, datetime.now()))
-    user = cur.execute('''SELECT id FROM users WHERE username = ?''', (username,)).fetchone()[0]
+    user_id = cur.lastrowid
     con.commit()
     con.close()
-    return user
+    return user_id
+
+#Проверка пароля
+def check_login(username, password):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('SELECT id, password FROM users WHERE username = ? AND password = ?', (username, password))
+    result = cur.fetchone()
+    con.close()
+    return result
 
 #Информация об одном пользователе по username
 def get_user_username(username):
@@ -30,7 +39,9 @@ def get_pass(username):
     cur.execute('''SELECT password FROM users WHERE username = ?''', (username,))
     result = cur.fetchone()
     con.close()
-    return result
+    if result:
+        return result[0]
+    return None
 
 #Получение id
 def get_id(username, password):
@@ -150,7 +161,8 @@ def create_task(user_id, name, description, limit_time):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     status = 0
-    cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time) VALUES (?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now()))
+    priority = 0
+    cur.execute('''INSERT INTO tasks (user_id, name, description, status, limit_time, created_time, priority) VALUES (?, ?, ?, ?, ?, ?, ?)''', (user_id, name, description, status, limit_time, datetime.now(), priority))
     task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, cur.lastrowid)).fetchone()
     con.commit()
     con.close()
@@ -184,7 +196,7 @@ def get_task_id(id, user_id):
     return result
 
 #Обновление задачи полностью
-def update_task(id, user_id, name, description, status, limit_time):
+def update_task(id, user_id, name, description, status, limit_time, priority):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     update = []
@@ -203,6 +215,9 @@ def update_task(id, user_id, name, description, status, limit_time):
     elif limit_time is not None:
         update.append('limit_time = ?')
         params.append(limit_time)
+    if priority is not None:
+        update.append('priority = ?')
+        params.append(priority)
     if len(update) > 0:
         params.append(id)
         cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
@@ -276,6 +291,14 @@ def update_status(id, status):
     con.close()
     #print("Статус обновлен")
 
+#Обновление приоритета задачи
+def update_priority(task_id, priority):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("UPDATE tasks SET priority = ? WHERE id = ?", (priority, task_id))
+    con.commit()
+    con.close()
+
 #Удаление задачи
 def delete_task(id, user_id):
     con = sqlite3.connect(DB_PATH)
@@ -311,7 +334,6 @@ def get_tasks_active(user_id):
                 result.append(i)
     return result
 
-
 #Просроченные
 def get_tasks_over(user_id):
     con = sqlite3.connect(DB_PATH)
@@ -337,4 +359,13 @@ def get_tasks_limit(user_id):
     tasks = cur.fetchall()
     con.close()
     result = [task for task in tasks if task[5]!=None]
+    return result
+
+#Приоритеты
+def get_tasks_priority(user_id, priority):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND priority = ?''', (user_id, priority))
+    result = cur.fetchall()
+    con.close()
     return result

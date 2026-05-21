@@ -109,6 +109,7 @@ class CreateTask(BaseModel):
     description: str = Field(None, max_length=300)
     status: int = Field(default=0)
     limit_time: str = Field(None)
+    priority: Literal[0, 1, 2] = Field(default=0)
 
     @field_validator('limit_time')
     @classmethod
@@ -129,6 +130,7 @@ class UpdateTask(BaseModel):
     description: Optional[str] = Field(None, max_length=300)
     status: Optional[Literal[0,1]] = Field(None)
     limit_time: Optional[str] = Field(None)
+    priority: Optional[Literal[0,1,2]] = Field(None)
 
     @field_validator('limit_time')
     @classmethod
@@ -149,3 +151,4 @@ class OutputTask(BaseModel):
     status: int
     limit_time: Optional[str]
     created_time: str
+    priority: int

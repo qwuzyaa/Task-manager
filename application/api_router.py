@@ -152,7 +152,7 @@ def create_t(task: CreateTask, user_id: int):
         user = get_user_id(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
-        task = create_task(user_id, task.name, task.description, task.status, task.limit_time)
+        task = create_task( user_id, task.name, task.description, task.limit_time)
         if task is None:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Cannot create task")
         return OutputTask(
@@ -162,7 +162,8 @@ def create_t(task: CreateTask, user_id: int):
             description=task[3],
             status=task[4],
             limit_time=task[5],
-            created_time=task[6]
+            created_time=task[6],
+            priority=task[7]
         )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -185,7 +186,8 @@ def get_all_tasks(user_id: int):
                 description=task[3],
                 status=task[4],
                 limit_time=task[5],
-                created_time=task[6])
+                created_time=task[6],
+                priority=task[7])
             for task in tasks
         ]
         return result
@@ -210,7 +212,8 @@ def get_tasks_by_name(name: str, user_id: int):
                 description=task[3],
                 status=task[4],
                 limit_time=task[5],
-                created_time=task[6]
+                created_time=task[6],
+                priority=task[7]
             )
             for task in tasks
         ]
@@ -235,7 +238,8 @@ def get_task_by_id(id: int, user_id: int):
             description=task[3],
             status=task[4],
             limit_time=task[5],
-            created_time=task[6]
+            created_time=task[6],
+            priority=task[7]
         )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -249,7 +253,7 @@ def update_t(id: int, task: UpdateTask, user_id: int):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
         if task.name is None and task.description is None and task.status is None and task.limit_time is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nothing to update")
-        t = update_task(id, user_id, task.name, task.description, task.status, task.limit_time)
+        t = update_task(id, user_id, task.name, task.description, task.status, task.limit_time, task.priority)
         if t is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
         return OutputTask(
@@ -259,7 +263,8 @@ def update_t(id: int, task: UpdateTask, user_id: int):
             description=t[3],
             status=t[4],
             limit_time=t[5],
-            created_time=t[6]
+            created_time=t[6],
+            priority=task[7]
         )
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

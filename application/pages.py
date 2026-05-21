@@ -24,7 +24,7 @@ def start_page_forms(request: Request, form_type: str = Form(...), name: str = F
                 return templates.TemplateResponse("startpage.html", {
                     "request": request})
             user = get_user_username(login_data.username)
-            if user and get_pass(login_data.username)[0] == login_data.password:
+            if user and get_pass(login_data.username) == login_data.password:
                 response = RedirectResponse("/homepage", status_code=303)
                 response.set_cookie("user_id", str(user[0]))
                 return response
@@ -67,6 +67,12 @@ def homepage(request: Request, search: str = "", filter: str = ""):
             tasks = get_tasks_over(int(user_id))
         elif filter == "limit":
             tasks = get_tasks_limit(int(user_id))
+        elif filter == "priority_low":
+            tasks = get_tasks_priority(int(user_id), 0)
+        elif filter == "priority_med":
+            tasks = get_tasks_priority(int(user_id), 1)
+        elif filter == "priority_high":
+            tasks = get_tasks_priority(int(user_id), 2)
         else:
             tasks = all_tasks
         total = len(all_tasks)
@@ -102,6 +108,19 @@ def logout():
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+@router.post("/update_task_priority/{task_id}")
+def update_task_priority(task_id: int, request: Request, priority: int = Form(...)):
+    try:
+        user_id = request.cookies.get("user_id")
+        if not user_id:
+            response = RedirectResponse("/", status_code=303)
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            return response
+        update_priority(task_id, priority)
+        return RedirectResponse(request.headers.get("referer", "/homepage"), status_code=303)
+    except Exception:
+        return RedirectResponse("/errorpage")
 
 @router.post("/update_task_status/{task_id}")
 def update_task_status(task_id: int, request: Request, status: int = Form(...)):
@@ -177,28 +196,26 @@ def edit_user_page(request: Request):
         return RedirectResponse("/errorpage")
 
 @router.post("/edituser")
-def edit_user_submit(request: Request,name: str = Form(None),username: str = Form(None), oldpassword: str = Form(None),newpassword: str = Form(None)):
+def edit_user_submit(request: Request,name: str = Form(None),username: str = Form(None),oldpassword: str = Form(None),newpassword: str = Form(None)):
     try:
         user_id = request.cookies.get("user_id")
         if not user_id:
-            response = RedirectResponse("/", status_code=303)
-            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-            return response
+            return RedirectResponse("/")
         user = get_user_id(int(user_id))
         try:
             update_data = UpdateUser(name=name, username=username, password=newpassword)
         except ValidationError:
             return RedirectResponse("/edituser", status_code=303)
-        if update_data.password:
+        if newpassword:
             current_password = get_pass(user[2])
-            if current_password and current_password[0] == oldpassword:
+            if not current_password:
+                return templates.TemplateResponse("edituser.html", {
+                    "request": request,
+                    "user": user
+                ,})
+            elif current_password==oldpassword:
                 update_user(int(user_id), None, None, update_data.password)
                 return RedirectResponse("/homepage", status_code=303)
-            return RedirectResponse("/edituser", status_code=303)
-        if username and username != user[2]:
-            existing_user = get_user_username(username)
-            if existing_user:
-                return RedirectResponse("/edituser", status_code=303)
         if name or username:
             update_user(int(user_id), update_data.name, update_data.username, None)
             return RedirectResponse("/homepage", status_code=303)
@@ -256,5 +273,6 @@ def delete_task_button(request: Request, task_id: int):
         return RedirectResponse("/errorpage")
 
 @router.get("/errorpage")
+@router.post("/errorpage")
 def error(request: Request):
     return templates.TemplateResponse("errorpage.html", {"request": request})

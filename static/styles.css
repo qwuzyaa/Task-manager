@@ -689,7 +689,7 @@ form {
 .filter-dropdown {
     position: absolute;
     top: 100%;
-    right: 0;
+    left: 0;
     margin-top: 5px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
@@ -702,7 +702,10 @@ form {
     display: block;
 }
 
-.filter-item {
+.filter-item,
+.filter-item-low,
+.filter-item-med,
+.filter-item-high {
     padding: 12px 16px;
     cursor: pointer;
     display: flex;
@@ -712,9 +715,24 @@ form {
     color: #163622;
 }
 
-.filter-item:hover {
+.filter-item:hover,
+.filter-item-low:hover,
+.filter-item-med:hover,
+.filter-item-high:hover {
     background: #f5f5f5;
     border-radius: 15px;
+}
+
+.filter-item-low {
+    color: #4caf50;
+}
+
+.filter-item-med {
+    color: #ff9800;
+}
+
+.filter-item-high {
+    color: #f44336;
 }
 
 .task-form input,
@@ -867,4 +885,59 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #163622;
     margin-top: 5px; 
     margin-left: 10px;   
+}
+
+.task-priority-section {
+    padding: 5px;
+}
+
+.priority-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.priority-low {
+    background: #4caf50;
+    color: #4caf50;
+}
+
+.priority-med {
+    background: #ff9800;
+    color: #ff9800;
+}
+
+.priority-high {
+    background: #f44336;
+    color: #f44336;
+}
+
+.priority-btn:hover {
+    transform: scale(1.05);
+    filter: brightness(0.95);
+}
+
+.priority-filter-button {
+    position: relative;
+}
+
+.priority-filter-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 2px 10px #4f2a2a0c;
+    min-width: 170px;
+    z-index: 99999;
+    display: none;
+}
+
+.priority-filter-dropdown.show {
+    display: block;
 }

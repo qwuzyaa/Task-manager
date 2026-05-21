@@ -20,12 +20,17 @@ def create_tables():
         status INTEGER DEFAULT 0, 
         limit_time TEXT DEFAULT NULL,
         created_time TEXT NOT NULL,
+        priority INTEGER DEFAULT 0, 
         FOREIGN KEY (user_id) REFERENCES users (id)
     );
     '''
     )
     con.commit()
     con.close()
+
+#0 - низший
+#1 - средний
+#2 - высший
 
 if __name__ == "__main__":
     create_tables()
