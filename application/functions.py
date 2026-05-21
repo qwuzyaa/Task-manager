@@ -298,10 +298,19 @@ def get_tasks_complited(user_id):
 def get_tasks_active(user_id):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
+    today = datetime.now().date()
     cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND status = 0''', (user_id,))
-    result = cur.fetchall()
+    tasks = cur.fetchall()
     con.close()
+    result = []
+    for i in tasks:
+        limit_time = i[5]
+        if limit_time and i[4] != 1:
+            deadline = datetime.strptime(limit_time, "%Y-%m-%d").date()
+            if deadline >= today:
+                result.append(i)
     return result
+
 
 #Просроченные
 def get_tasks_over(user_id):

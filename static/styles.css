@@ -270,6 +270,7 @@ form {
 }
 
 .back, .back-edit {
+    position: relative;
     background: #0d331a13;
     border-radius: 25px;
     padding-top: 16px;
@@ -279,6 +280,11 @@ form {
     width: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.back, 
+.tasks-container {
+     overflow: visible !important;
 }
 
 .back-edit {
@@ -466,6 +472,9 @@ form {
     justify-content: space-between;
     align-items: center;
     gap: 15px;
+    position: relative;
+    z-index: 1000;
+    overflow: visible !important;
 }
 
 .filter-button,
@@ -595,6 +604,9 @@ form {
     column-gap: 25px;
     padding: 10px;
     margin-top: -20px;
+    overflow: visible !important;
+    position: relative;
+    z-index: 1;
 }
 
 .task-container {
@@ -671,6 +683,7 @@ form {
 
 .filter-button {
     position: relative;
+    z-index: 1000;
 }
 
 .filter-dropdown {
@@ -680,9 +693,8 @@ form {
     margin-top: 5px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
-    box-shadow: 0 2px 10px #4f2a2a0c;
     min-width: 170px;
-    z-index: 100;
+    z-index: 99999;
     display: none;
 }
 
