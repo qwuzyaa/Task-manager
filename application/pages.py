@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from application.functions import *
 from pydantic import ValidationError
 from application.schemes import CreateUser, LoginUser, UpdateUser
+import bcrypt
 
 router = APIRouter(tags=['Pages'])
 
@@ -13,6 +14,7 @@ templates = Jinja2Templates(directory='templates')
 @router.get("/", response_class=HTMLResponse)
 def start_page(request: Request):
     return templates.TemplateResponse("startpage.html", {"request": request})
+
 
 @router.post("/")
 def start_page_forms(request: Request, form_type: str = Form(...), name: str = Form(None), username: str = Form(...),password: str = Form(...)):
@@ -24,12 +26,17 @@ def start_page_forms(request: Request, form_type: str = Form(...), name: str = F
                 return templates.TemplateResponse("startpage.html", {
                     "request": request})
             user = get_user_username(login_data.username)
-            if user and get_pass(login_data.username) == login_data.password:
-                response = RedirectResponse("/homepage", status_code=303)
-                response.set_cookie("user_id", str(user[0]))
-                return response
+            if user:
+                stored_hash = get_pass(login_data.username)
+                if isinstance(stored_hash, str):
+                    stored_hash = stored_hash.encode('utf-8')
+                if bcrypt.checkpw(login_data.password.encode('utf-8'), stored_hash):
+                    response = RedirectResponse("/homepage", status_code=303)
+                    response.set_cookie("user_id", str(user[0]))
+                    return response
             return templates.TemplateResponse("startpage.html", {
-                "request": request})
+                "request": request
+            })
         elif form_type == "register":
             try:
                 register_data = CreateUser(name=name, username=username, password=password)
@@ -39,12 +46,13 @@ def start_page_forms(request: Request, form_type: str = Form(...), name: str = F
             if get_user_username(register_data.username):
                 return templates.TemplateResponse("startpage.html", {
                     "request": request})
-            user_id = create_user(register_data.name, register_data.username, register_data.password)
+            hashed = bcrypt.hashpw(register_data.password.encode('utf-8'), bcrypt.gensalt())
+            hashed_str = hashed.decode('utf-8')
+            user_id = create_user(register_data.name, register_data.username, hashed_str)
             response = RedirectResponse("/homepage", status_code=303)
             response.set_cookie("user_id", str(user_id))
             return response
-    except Exception as e:
-        print(f"Ошибка: {e}")
+    except Exception:
         return RedirectResponse("/errorpage")
 
 @router.get("/homepage")
@@ -206,6 +214,7 @@ def edit_user_submit(request: Request,name: str = Form(None),username: str = For
             update_data = UpdateUser(name=name, username=username, password=newpassword)
         except ValidationError:
             return RedirectResponse("/edituser", status_code=303)
+
         if newpassword:
             current_password = get_pass(user[2])
             if not current_password:
@@ -216,6 +225,7 @@ def edit_user_submit(request: Request,name: str = Form(None),username: str = For
             elif current_password==oldpassword:
                 update_user(int(user_id), None, None, update_data.password)
                 return RedirectResponse("/homepage", status_code=303)
+
         if name or username:
             update_user(int(user_id), update_data.name, update_data.username, None)
             return RedirectResponse("/homepage", status_code=303)

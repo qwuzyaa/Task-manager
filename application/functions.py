@@ -32,11 +32,22 @@ def get_user_username(username):
     con.close()
     return result
 
-#Получение пароля
+#Получение пароля username
 def get_pass(username):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('''SELECT password FROM users WHERE username = ?''', (username,))
+    result = cur.fetchone()
+    con.close()
+    if result:
+        return result[0]
+    return None
+
+#Получение пароля id
+def get_pass_id(id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT password FROM users WHERE usernameid = ?''', (id,))
     result = cur.fetchone()
     con.close()
     if result:
