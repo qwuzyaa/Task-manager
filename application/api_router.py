@@ -1,12 +1,17 @@
 from fastapi import status, HTTPException, APIRouter
 from application.functions import *
-from typing import Optional
+import bcrypt
 from application.schemes import *
 import sqlite3
+import os
+from dotenv import load_dotenv
 
 router = APIRouter()
 
-admin_key = 'Task-manager-admin'
+
+load_dotenv()
+
+admin_key = os.getenv('API_KEY')
 
 '''
 @router.get("/")
@@ -21,8 +26,9 @@ def register_user(user: CreateUser):
         trying = get_user_username(user.username)
         if trying:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists")
-
-        user_id = create_user(user.name, user.username, user.password)
+        hashed = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+        hashed_str = hashed.decode('utf-8')
+        user_id = create_user(user.name, user.username, hashed_str)
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create user")
 
@@ -47,9 +53,11 @@ def login_user(user: LoginUser):
         if u is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No such user")
         else:
-            pas = (get_pass(user.username))[0]
-            if str(pas) != user.password:
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid data")
+            stored_hash = get_pass(user.username)
+            if isinstance(stored_hash, str):
+                stored_hash = stored_hash.encode('utf-8')
+            if not bcrypt.checkpw(user.password.encode('utf-8'), stored_hash):
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong password")
         return {
             "message": "Login successful",
             "user_id": u[0],
@@ -127,10 +135,11 @@ def update_u(id: int, user: UpdateUser):
             user_with_same_username = get_user_username(user.username)
             if user_with_same_username is not None and user_with_same_username[0] != id:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"Username '{user.username}' is already in use by another user")
-        updated_user = update_user(id, user.name, user.username, user.password)
+        hashed_new_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+        hashed_new_password_str = hashed_new_password.decode('utf-8')
+        updated_user = update_user(id, user.name, user.username, hashed_new_password_str)
         if updated_user is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,detail=f"User with id={id} not found after update")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"User with id={id} not found after update")
         trying_1 = get_user_id(id)
         if trying_1 is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

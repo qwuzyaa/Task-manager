@@ -22,8 +22,7 @@ def start_page_forms(request: Request, form_type: str = Form(...), name: str = F
             try:
                 login_data = LoginUser(username=username, password=password)
             except ValidationError:
-                return templates.TemplateResponse("startpage.html", {
-                    "request": request})
+                return templates.TemplateResponse("startpage.html", {"request": request})
             user = get_user_username(login_data.username)
             if user:
                 stored_hash = get_pass(login_data.username)
@@ -33,18 +32,14 @@ def start_page_forms(request: Request, form_type: str = Form(...), name: str = F
                     response = RedirectResponse("/homepage", status_code=303)
                     response.set_cookie("user_id", str(user[0]))
                     return response
-            return templates.TemplateResponse("startpage.html", {
-                "request": request
-            })
+            return templates.TemplateResponse("startpage.html", {"request": request})
         elif form_type == "register":
             try:
                 register_data = CreateUser(name=name, username=username, password=password)
             except ValidationError:
-                return templates.TemplateResponse("startpage.html", {
-                    "request": request})
+                return templates.TemplateResponse("startpage.html", {"request": request})
             if get_user_username(register_data.username):
-                return templates.TemplateResponse("startpage.html", {
-                    "request": request})
+                return templates.TemplateResponse("startpage.html", {"request": request})
             hashed = bcrypt.hashpw(register_data.password.encode('utf-8'), bcrypt.gensalt())
             hashed_str = hashed.decode('utf-8')
             user_id = create_user(register_data.name, register_data.username, hashed_str)

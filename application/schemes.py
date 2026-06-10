@@ -22,7 +22,7 @@ class CreateUser(BaseModel):
     @field_validator('username')
     @classmethod
     def validate_username(cls, v: str) -> str:
-        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
@@ -72,7 +72,7 @@ class UpdateUser(BaseModel):
     def validate_username(cls, v: str) -> str:
         if v is None:
             return v
-        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?]', v):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
