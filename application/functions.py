@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 import os
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
+current_dir = os.getcwd()
 DB_PATH = os.path.join(current_dir, "database", "task_m.db")
 
 """Пользователь"""
@@ -242,59 +242,6 @@ def update_task(id, user_id, name, description, status, limit_time, priority):
     con.close()
     return task
 
-#Обновление задачи ез статуса
-def update_task_v2(id, user_id, name, description, limit_time):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    update = []
-    params = []
-    if name is not None:
-        update.append('name = ?')
-        params.append(name)
-    if description is not None:
-        update.append('description = ?')
-        params.append(description)
-    if limit_time is not None:
-        update.append('limit_time = ?')
-        params.append(limit_time)
-    if len(update) > 0:
-        params.append(id)
-        cur.execute(f'''UPDATE tasks SET {','.join(update)} WHERE id = ?''', params)
-        #task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
-        con.commit()
-    #else:
-        #task = cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND id = ?''', (user_id, id)).fetchone()
-        #con.commit()
-    con.close()
-    #return task
-
-#Обновление названия задачи
-def update_name_task(id, name):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute('''UPDATE tasks SET name = ? WHERE id = ?''', (name, id))
-    con.commit()
-    con.close()
-    print("Название обновлено")
-
-#Обновление описания задачи
-def update_description_task(id, description):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute('''UPDATE tasks SET description = ? WHERE id = ?''', (description, id))
-    con.commit()
-    con.close()
-    print("Описание обновлено")
-
-#Обновление дедлайна задачи
-def update_deadline(id, limit_time):
-    con = sqlite3.connect(DB_PATH)
-    cur = con.cursor()
-    cur.execute('''UPDATE tasks SET limit_time = ? WHERE id = ?''', (limit_time, id))
-    con.commit()
-    con.close()
-    print("Дедлайн обновлен")
-
 #Обновление статуса задачи
 def update_status(id, status):
     con = sqlite3.connect(DB_PATH)
@@ -321,6 +268,15 @@ def delete_task(id, user_id):
     con.close()
 
 """Фильтрация"""
+#По статусу
+def get_tasks_status(user_id, status: int):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute('''SELECT * FROM tasks WHERE user_id = ? AND status = ?''', (user_id, status))
+    result = cur.fetchall()
+    con.close()
+    return result
+
 #Завершенные
 def get_tasks_complited(user_id):
     con = sqlite3.connect(DB_PATH)
