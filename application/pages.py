@@ -15,7 +15,6 @@ templates = Jinja2Templates(directory='templates')
 def start_page(request: Request):
     return templates.TemplateResponse("startpage.html", {"request": request})
 
-
 @router.post("/")
 def start_page_forms(request: Request, form_type: str = Form(...), name: str = Form(None), username: str = Form(...),password: str = Form(...)):
     try:
@@ -214,24 +213,30 @@ def edit_user_submit(request: Request,name: str = Form(None),username: str = For
             update_data = UpdateUser(name=name, username=username, password=newpassword)
         except ValidationError:
             return RedirectResponse("/edituser", status_code=303)
-
+        if username and username != user[2]:  # если username изменён
+            existing_user = get_user_username(username)
+            if existing_user:
+                return templates.TemplateResponse("edituser.html", {
+                    "request": request,
+                    "user": user})
         if newpassword:
-            current_password = get_pass(user[2])
-            if not current_password:
+            stored_hash = get_pass(user[2])
+            if isinstance(stored_hash, str):
+                stored_hash = stored_hash.encode('utf-8')
+            if not bcrypt.checkpw(oldpassword.encode('utf-8'), stored_hash):
                 return templates.TemplateResponse("edituser.html", {
                     "request": request,
                     "user": user
-                ,})
-            elif current_password==oldpassword:
-                update_user(int(user_id), None, None, update_data.password)
-                return RedirectResponse("/homepage", status_code=303)
-
+                })
+            hashed_new_password = bcrypt.hashpw(newpassword.encode('utf-8'), bcrypt.gensalt())
+            hashed_new_password_str = hashed_new_password.decode('utf-8')
+            update_user(int(user_id), None, None, hashed_new_password_str)
+            return RedirectResponse("/homepage", status_code=303)
         if name or username:
             update_user(int(user_id), update_data.name, update_data.username, None)
             return RedirectResponse("/homepage", status_code=303)
         return RedirectResponse("/homepage", status_code=303)
-    except Exception as e:
-        print(f"ОШИБКА: {e}")
+    except Exception:
         return RedirectResponse("/errorpage")
 
 @router.get("/edittask", response_class=HTMLResponse)
@@ -261,11 +266,12 @@ def edit_task(request: Request,task_id: int,name: str = Form(None),description: 
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             return response
         if limit_time is None:
-            update_task(task_id, int(user_id), name, description, None, None)
+            update_task(task_id, int(user_id), name, description, None, None, None)
         else:
-            update_task(task_id, int(user_id), name, description, None, limit_time)
+            update_task(task_id, int(user_id), name, description, None, limit_time, None)
         return RedirectResponse("/homepage", status_code=303)
-    except Exception:
+    except Exception as e:
+        print(e)
         return RedirectResponse("/errorpage")
 
 @router.delete("/delete_task")

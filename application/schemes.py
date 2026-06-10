@@ -11,7 +11,7 @@ class CreateUser(BaseModel):
     @field_validator('name')
     @classmethod
     def validate_name(cls, v: str) -> str:
-        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
             raise ValueError('Name must not contain special characters')
         if re.search(r'[0-9]', v):
             raise ValueError('Name must not contain numbers')
@@ -22,7 +22,7 @@ class CreateUser(BaseModel):
     @field_validator('username')
     @classmethod
     def validate_username(cls, v: str) -> str:
-        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
@@ -39,7 +39,7 @@ class CreateUser(BaseModel):
             raise ValueError('Password must contain at least one letter')
         if " " in v:
             raise ValueError('Password must not contain spaces')
-        if  not re.search(r'[!@#$%^&*?]', v):
+        if  not re.search(r'[!@#$%^&*?_-]', v):
             raise ValueError('Password must not contain at least one special character !@#$%^&*?')
         if not re.search(r'[0-9]', v):
             raise ValueError('Password must not contain at least one number')
@@ -59,7 +59,7 @@ class UpdateUser(BaseModel):
     def validate_name(cls, v: str) -> str:
         if v is None:
             return v
-        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
             raise ValueError('Name must not contain special characters')
         if re.search(r'[0-9]', v):
             raise ValueError('Name must not contain numbers')
@@ -72,7 +72,7 @@ class UpdateUser(BaseModel):
     def validate_username(cls, v: str) -> str:
         if v is None:
             return v
-        if re.search(r'[!@":;№()/|#$%^&*?]', v):
+        if re.search(r'[!@":;№()/|#$%^&*?_-]', v):
             raise ValueError('Username must not contain special characters')
         if " " in v:
             raise ValueError('Username must not contain spaces')
@@ -91,7 +91,7 @@ class UpdateUser(BaseModel):
             raise ValueError('Password must contain at least one letter')
         if " " in v:
             raise ValueError('Password must not contain spaces')
-        if not re.search(r'[!@#$%^&*?]', v):
+        if not re.search(r'[!@#$%^&*?-_]', v):
             raise ValueError('Password must not contain at least one special character !@#$%^&*?')
         if not re.search(r'[0-9]', v):
             raise ValueError('Password must not contain at least one number')

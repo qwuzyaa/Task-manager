@@ -14,5 +14,6 @@ CREATE TABLE tasks (
     status INTEGER DEFAULT 0, 
     limit_time TEXT,
     created_time TEXT NOT NULL,
+    priority INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
