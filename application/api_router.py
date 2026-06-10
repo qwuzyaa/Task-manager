@@ -1,4 +1,4 @@
-from fastapi import status, HTTPException, APIRouter
+from fastapi import status, HTTPException, APIRouter, Query
 from application.functions import *
 import bcrypt
 from application.schemes import *
@@ -203,7 +203,7 @@ def get_all_tasks(user_id: int):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/api/tasks/search/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+@router.get("/api/tasks/searchname/{name}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
 def get_tasks_by_name(name: str, user_id: int):
     """Получить задачи пользователя по названию"""
     try:
@@ -230,14 +230,14 @@ def get_tasks_by_name(name: str, user_id: int):
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/api/tasks/task/{id}", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_200_OK)
-def get_task_by_id(id: int, user_id: int):
+@router.get("/api/tasks/task/{id_task}", tags = ['Task'], response_model=OutputTask, status_code=status.HTTP_200_OK)
+def get_task_by_id(id_task: int, user_id: int):
     """Получить задачу пользователя по id"""
     try:
         user = get_user_id(user_id)
         if user is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
-        task = get_task_id(id, user_id)
+        task = get_task_id(id_task, user_id)
         if task is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
         return OutputTask(
@@ -250,6 +250,114 @@ def get_task_by_id(id: int, user_id: int):
             created_time=task[6],
             priority=task[7]
         )
+    except sqlite3.OperationalError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/api/tasks/searchstatus/{st}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+def get_tasks_by_status(st: int, user_id: int):
+    """Получить задачи пользователя по статусу"""
+    try:
+        user = get_user_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
+        tasks = get_tasks_status(user_id, st)
+        if len(tasks) == 0:
+            raise HTTPException(status_code=status.HTTP_200_OK, detail="There are no tasks")
+        result = [
+            OutputTask(
+                user_id=task[0],
+                id=task[1],
+                name=task[2],
+                description=task[3],
+                status=task[4],
+                limit_time=task[5],
+                created_time=task[6],
+                priority=task[7]
+            )
+            for task in tasks
+        ]
+        return result
+    except sqlite3.OperationalError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/api/tasks/searchpriority/{priotity}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+def get_tasks_by_priority(priority: int, user_id: int):
+    """Получить задачи пользователя по приоритету"""
+    try:
+        user = get_user_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
+        tasks = get_tasks_priority(user_id, priority)
+        if len(tasks) == 0:
+            raise HTTPException(status_code=status.HTTP_200_OK, detail="There are no tasks")
+        result = [
+            OutputTask(
+                user_id=task[0],
+                id=task[1],
+                name=task[2],
+                description=task[3],
+                status=task[4],
+                limit_time=task[5],
+                created_time=task[6],
+                priority=task[7]
+            )
+            for task in tasks
+        ]
+        return result
+    except sqlite3.OperationalError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/api/tasks/searchtime/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+def get_tasks_by_time(user_id: int ):
+    """Получить просроченные задачи пользователя"""
+    try:
+        user = get_user_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
+        tasks = get_tasks_over(user_id)
+        if len(tasks) == 0:
+            raise HTTPException(status_code=status.HTTP_200_OK, detail="There are no tasks")
+        result = [
+            OutputTask(
+                user_id=task[0],
+                id=task[1],
+                name=task[2],
+                description=task[3],
+                status=task[4],
+                limit_time=task[5],
+                created_time=task[6],
+                priority=task[7]
+            )
+            for task in tasks
+        ]
+        return result
+    except sqlite3.OperationalError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+@router.get("/api/tasks/searchlimittime/{user_id}", tags = ['Task'], response_model=list[OutputTask], status_code=status.HTTP_200_OK)
+def get_tasks_by_limittime(user_id: int ):
+    """Получить задачи пользователя по времени окончания"""
+    try:
+        user = get_user_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such user")
+        tasks = get_tasks_limit(user_id)
+        if len(tasks) == 0:
+            raise HTTPException(status_code=status.HTTP_200_OK, detail="There are no tasks")
+        result = [
+            OutputTask(
+                user_id=task[0],
+                id=task[1],
+                name=task[2],
+                description=task[3],
+                status=task[4],
+                limit_time=task[5],
+                created_time=task[6],
+                priority=task[7]
+            )
+            for task in tasks
+        ]
+        return result
     except sqlite3.OperationalError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
