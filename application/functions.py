@@ -1,7 +1,9 @@
 import sqlite3
 from datetime import datetime
+import os
 
-DB_PATH = r"C:\Users\User\Task-manager\database\task_m.db"
+current_dir = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(current_dir, "database", "task_m.db")
 
 """Пользователь"""
 #Добавление пользователя
